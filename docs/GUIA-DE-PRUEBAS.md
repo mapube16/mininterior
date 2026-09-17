@@ -154,7 +154,6 @@ Para que nadie se lleve una sorpresa delante del cliente:
 |---|---|
 | **Crear cuenta nueva** | Solo se entra con las cuentas de esta guía |
 | **Subir archivos de verdad** | Se guarda el nombre del archivo, no su contenido |
-| **OCR y extracción automática** | **No hay ningún modelo conectado.** Existen los campos donde iría el texto extraído (`ocr_texto`, `datos_extraidos`), pero nada los llena: la pantalla de digitalización muestra campos escritos a mano. Ver la nota de abajo |
 | **Firma electrónica real** | Se simula; el radicado oficial lo genera un mock de ControlDoc |
 | **Correo y SMS** | Se registran como enviados, no salen |
 | **Pantallas de administración** | Plantillas, reglas y auditoría siguen con datos de ejemplo |
@@ -162,20 +161,46 @@ Para que nadie se lleve una sorpresa delante del cliente:
 Lo que **sí** es real: la sesión, la radicación, el paso del caso entre roles, los días
 hábiles, las reglas de negocio y la separación de datos por rol.
 
-### Sobre el OCR
+---
 
-El contexto del proyecto deja la decisión abierta: *"Tesseract o servicio gestionado;
-extracción estructurada con modelo de visión"*. Todavía no se ha elegido, y conviene
-decidirlo antes de construirlo porque cambia el despliegue:
+## Lectura automática de documentos
 
-| Opción | A favor | En contra |
-|---|---|---|
-| **Tesseract** (local) | Sin costo por documento, los archivos no salen de la infraestructura del Estado | Falla con fotos de celular torcidas o con poca luz, que es justo el caso de uso |
-| **Modelo de visión** (API) | Lee fotos difíciles y extrae campos estructurados, no solo texto | Costo por documento y los documentos salen a un tercero, con datos personales de por medio |
+Funciona con **Gemini 3.6 Flash**. Se prueba desde la documentación de la API:
 
-La segunda opción choca con la clasificación de datos del proyecto, así que no es solo
-una decisión técnica. Lo que sí está construido es el **contrato**: si el OCR falla, el
-trámite sigue por vía manual con marca prioritaria, nunca se bloquea.
+1. Abre https://api-production-0777.up.railway.app/docs
+2. **Authorize** → `jorge.ibarra@mininterior.gov.co` / `demo1234`
+3. `POST /api/documentos/leer` → **Try it out**
+4. `tipo_documento`: `Acta de asamblea` · `archivo`: el PDF de [ejemplos/](ejemplos/)
+
+Devuelve, en unos 6 segundos:
+
+```json
+{
+  "legible": true,
+  "campos": {
+    "representante_nombre": "ROSALBA MOSQUERA",
+    "representante_documento": "1061700000",
+    "fecha_acta": "2026-08-15",
+    "comunidad": "Consejo Comunitario Guapi Abajo Unidos",
+    "municipio": "Guapi"
+  },
+  "validado": false
+}
+```
+
+**Qué mirar:** convirtió *"quince (15) días del mes de agosto de dos mil veintiséis"*
+en `2026-08-15` y quitó los puntos del número de documento. Con el listado censal
+extrae los conteos como números (210 = 104 + 106).
+
+**`validado: false` es deliberado.** Lo extraído se le propone a una persona, que
+corrige y confirma; nunca entra solo al expediente.
+
+**Sube un archivo cualquiera** (un .txt renombrado a .pdf) y verás
+`legible: false` con `marcar_prioritario: true`: el trámite no se bloquea, pasa a
+transcripción manual. Ningún fallo de IA detiene un caso.
+
+> Falta conectarlo a la pantalla de digitalización (P30), que todavía muestra campos
+> de ejemplo. El endpoint ya funciona.
 
 ---
 
