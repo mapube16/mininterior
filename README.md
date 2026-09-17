@@ -1,75 +1,149 @@
-# Portal RUPN NARP — frontend
+# Portal RUPN NARP
 
-Registro Público Único Nacional de comunidades negras, afrocolombianas, raizales y palenqueras
-(Ministerio del Interior, dominio GOV.CO).
+Registro Público Único Nacional de comunidades negras, afrocolombianas, raizales y
+palenqueras — Ministerio del Interior de Colombia, dominio GOV.CO.
 
-**Desplegado en** https://web-production-aca85.up.railway.app
-**API**: https://api-production-0777.up.railway.app — [documentación interactiva](https://api-production-0777.up.railway.app/docs)
+| | |
+|---|---|
+| **Portal** | https://web-production-aca85.up.railway.app |
+| **API** | https://api-production-0777.up.railway.app — [documentación interactiva](https://api-production-0777.up.railway.app/docs) |
 
-Port a React + Vite de las 41 pantallas del handoff de diseño `design_handoff_rupn_narp`:
-portal público de consulta, flujo ciudadano de radicación y back office interno (clasificación,
-asignación, análisis, revisión, firma y administración).
+Sistema de gestión de trámites del registro: consulta pública de comunidades, radicación
+en línea para el ciudadano y back office para los nueve roles que tramitan el caso
+(clasificación, asignación, análisis, proyección, pre-revisión, revisión, firma,
+coordinación y administración).
+
+Reemplaza un flujo manual de nueve etapas que hoy acumula **10.388 casos pendientes**, de
+los cuales 8.740 (84 %) están en una mesa de entrada sin responsable asignado. La mediana
+de resolución de un trámite de registro es de **49 días hábiles** y el 77 % se resuelve
+fuera de término.
+
+## Qué hay en el repo
+
+```
+/                 Portal (React + Vite): las 41 pantallas del handoff de diseño.
+backend/          API (FastAPI + PostgreSQL): dominio, reglas y métricas.
+```
+
+Cada uno se despliega por separado en Railway y `backend/` tiene su propio README con el
+detalle del dominio.
 
 ## Correr en local
 
+**Portal**
+
 ```bash
 npm install
-npm run dev      # http://localhost:5173
+npm run dev                  # http://localhost:5173
 ```
+
+**API**
 
 ```bash
-npm run build    # compila a dist/
-npm start        # sirve dist/ como en producción
-npm run lint
+cd backend
+python -m venv .venv
+.venv/Scripts/pip install -r requirements-dev.txt    # Linux/macOS: .venv/bin/pip
+.venv/Scripts/python -m uvicorn app.main:app --reload
+curl -X POST http://localhost:8000/api/admin/sembrar # datos ficticios de demo
 ```
 
-## Estructura
+Sin `DATABASE_URL` la API usa SQLite, que basta para recorrer el flujo completo. Sin
+`VITE_API_URL` el portal apunta a la API desplegada; si no responde, cae a los datos de
+ejemplo para que el diseño siga viéndose.
+
+## Pruebas
+
+```bash
+npm run build && npm run lint
+npm run test:reglas          # reglas de negocio en navegador real (necesita el portal servido)
+cd backend && .venv/Scripts/python -m pytest      # 49 pruebas
+```
+
+`pruebas/reglas.mjs` acepta `BASE_URL` para correr contra el despliegue en vez de local.
+
+## Reglas que el sistema hace cumplir
+
+No son detalles de implementación: son las decisiones que sostienen el diseño. Cada una
+está en el backend —no en la interfaz— y tiene su prueba.
+
+| Regla | Por qué | Dónde |
+|---|---|---|
+| El retorno interno es **único** y no reinicia el reloj | Sin tope se reconstruye el ciclo infinito del proceso actual | `estados.py`, `servicio.mover` |
+| La decisión del asesor **precede** al borrador | Si el borrador va primero, se cede criterio jurídico al modelo | `POST /casos/{id}/proyeccion` → 409 |
+| La pre-revisión **no emite veredicto** ni puntaje | Un "aprobado" produce sesgo de automatización y el revisor deja de revisar | `prerevision.py` |
+| Ningún fallo de IA **detiene** un trámite | Siempre hay vía manual | La capa 2 cae a la capa 1 con aviso |
+| Ningún caso queda **sin dueño** | Es el fallo que produjo los 8.740 casos atascados | `ROL_POR_ESTADO`, tablero |
+| Lo que no es competencia **se desvía** al clasificar | Hoy 854 demandas y 2.374 tutelas caen en la misma bandeja | `enrutamiento.py` |
+| La publicación del radicado es **idempotente** | Un reintento mal hecho duplica actos administrativos | `PublicacionRadicado` |
+| Los retornos internos **no se le muestran** al ciudadano | Ver la barra retroceder genera llamadas | `visible_ciudadano` |
+| El registro público solo expone **campos públicos** | Ley 1581 de 2012: la pertenencia étnica es dato sensible | `Comunidad.CAMPOS_PUBLICOS` |
+| El color **nunca va solo** | Accesibilidad: todo estado lleva símbolo (✓ ↻ • !) | `components/ui.jsx` |
+
+Los términos se cuentan en **días hábiles colombianos calculados**, con el traslado de la
+Ley Emiliani y los festivos móviles de Pascua. De ahí sale todo vencimiento del sistema.
+
+## Estructura del portal
 
 ```
 src/
-  ds/          Kit UI GOV.CO 9.2 (tokens CSS + componentes) tal como vino del handoff.
-               index.js es un shim: el kit viene compilado como IIFE que espera
-               window.React, así que le damos el global y reexporta sus componentes.
-  components/  Layout (el esqueleto de las 41 pantallas), ui.jsx (primitivas
-               compartidas: Estado, Aviso, Tarjeta, Fila...), MapaConsulta (Leaflet).
-  mock/        datos.js — TODOS los datos de ejemplo, en un solo módulo.
-  pages/       Una pantalla por archivo, nombradas P<N><Nombre>.jsx como en el handoff.
-  routes.js    Mapa de rutas; cada una anotada con la pantalla PN de origen.
+  ds/          Kit UI GOV.CO 9.2 tal como vino del handoff. index.js es un shim:
+               el kit viene compilado como IIFE que espera window.React, así que
+               le damos el global y reexporta sus 24 componentes.
+  api/         cliente.js traduce entre los enums del backend y las etiquetas del
+               diseño, en un solo sitio. useDatos.js cae a los datos de ejemplo.
+  components/  Layout (el esqueleto de las 41 pantallas), ui.jsx (Estado, Aviso,
+               Tarjeta, Fila...), MapaConsulta (Leaflet).
+  mock/        datos.js — los datos de ejemplo, en un solo módulo.
+  pages/       Una pantalla por archivo, P<N><Nombre>.jsx como en el handoff.
+  routes.js    Mapa de rutas, cada una anotada con su pantalla de origen.
 ```
+
+Las rutas se cargan de forma diferida: el trozo de Leaflet (156 kB) no se descarga en el
+back office, que nunca muestra mapas. Importa porque el sistema se usa desde móviles de
+gama baja con 2G/3G.
 
 ## Estado actual
 
-Portal + API funcionando. El backend vive en [backend/](backend/) (FastAPI + PostgreSQL) y
-tiene su propio README con el detalle del dominio y las reglas.
+Las pantallas de consulta pública ya consumen la API. El back office sigue con datos de
+ejemplo; `src/api/cliente.js` ya expone todos los endpoints que necesita, así que es
+cablear, no diseñar. Los puntos pendientes están marcados con `// TODO(backend):`.
 
-Las pantallas de consulta pública ya consumen la API. El resto sigue con datos de ejemplo;
-los puntos pendientes de cablear están marcados con `// TODO(backend):`, y `src/api/cliente.js`
-ya expone todos los endpoints que necesitan.
+Se simulan, como pide el alcance del MVP: ControlDoc (el radicado oficial), la firma
+electrónica, el correo y el SMS. El mock de ControlDoc falla a voluntad —variable
+`CONTROLDOC_FALLA`— para poder demostrar que un reintento no duplica el acto.
 
-Sin `VITE_API_URL` el portal funciona igual con los datos de ejemplo, que es como se enseña
-el diseño cuando la API no está arriba.
+La capa 2 de pre-revisión (el agente de coherencia) tiene contrato, validación y fallback
+implementados, pero todavía sin modelo conectado: `prerevision.ejecutar` acepta la salida
+por parámetro. Conectar un modelo es implementar esa llamada; lo que protege del sesgo de
+automatización ya está.
 
-Lo que el port conserva a propósito, porque son decisiones de diseño y no detalles:
+## Despliegue
 
-- El registro público (P3) muestra solo nombre, tipo de organización, municipio, departamento
-  y estado. Nunca dirigentes, contactos, censo ni coordenadas exactas — eso es P25, la ficha interna.
-- Un caso solo puede devolverse del revisor al asesor **una vez** (P13).
-- El asesor registra sentido y fundamento **antes** de que exista cualquier borrador (P10):
-  el sistema llena, no decide.
-- La pre-revisión nunca da veredicto ni porcentaje de confianza (P13), solo hallazgos y
-  verificaciones superadas.
-- La firma por lote exige confirmación individual de cada documento (P15).
-- El color nunca va solo: todo estado lleva además un símbolo (✓ ↻ • !).
+Tres servicios en Railway: `web` (portal), `api` (raíz `backend/`) y PostgreSQL.
 
-## Despliegue en Railway
+| Variable | Servicio | Para qué |
+|---|---|---|
+| `VITE_API_URL` | web | A qué API apunta. Vite la inyecta **en build**, no en runtime. |
+| `DATABASE_URL` | api | La inyecta Railway al enlazar Postgres. Sin ella, SQLite. |
+| `JWT_SECRET` | api | **Cambiar en producción.** |
+| `CONTROLDOC_FALLA` | api | `true` fuerza el fallo del documental para la demostración. |
 
-Dos servicios y una base: `web` (este portal), `api` (raíz `backend/`) y PostgreSQL.
-`railway.json` ya trae la configuración. El build genera `dist/` y `npm start` lo sirve con
-`sirv --single` (el `--single` es lo que hace que recargar `/consulta` no dé 404, porque el
-enrutamiento es del lado del cliente). Railway inyecta `PORT`.
+El portal se sirve con `sirv --single`: el `--single` es lo que hace que recargar
+`/consulta` no dé 404, porque el enrutamiento es del lado del cliente.
+
+## Datos
+
+Todos los datos de demostración son **ficticios**. El extracto real contiene cédulas y
+teléfonos de ciudadanos en cuerpos de correos y no se usa como semilla. Los municipios sí
+son reales y las coordenadas son del **centroide municipal**, nunca de la ubicación de la
+comunidad.
+
+Usuarios del seed, todos con clave `demo1234`: clasificadora, mesa/coordinadora, tres
+asesores, revisora/firmante, ventanilla, administradora y una ciudadana. Un usuario puede
+tener varios roles; no se duplican cuentas.
 
 ## Mapas
 
-Leaflet con tiles de Esri World Street Map (el OSM público responde 403 desde este entorno,
-según la nota del handoff). En P2 el hover está sincronizado en ambos sentidos entre la lista
-y el mapa, y alterna entre marca agrupada por municipio y una marca por comunidad.
+Leaflet con tiles de Esri World Street Map (el OSM público responde 403 desde este
+entorno). En la consulta el hover está sincronizado en ambos sentidos entre la lista y el
+mapa, y alterna entre marca agrupada por municipio y una marca por comunidad.
