@@ -3,6 +3,9 @@
 Registro Público Único Nacional de comunidades negras, afrocolombianas, raizales y palenqueras
 (Ministerio del Interior, dominio GOV.CO).
 
+**Desplegado en** https://web-production-aca85.up.railway.app
+**API**: https://api-production-0777.up.railway.app — [documentación interactiva](https://api-production-0777.up.railway.app/docs)
+
 Port a React + Vite de las 41 pantallas del handoff de diseño `design_handoff_rupn_narp`:
 portal público de consulta, flujo ciudadano de radicación y back office interno (clasificación,
 asignación, análisis, revisión, firma y administración).
