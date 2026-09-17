@@ -1,0 +1,38 @@
+/* Jerarquia tipografica - Kit UI 9.2.
+   Headings: Nunito Sans Bold. Description: Nunito Sans SemiBold.
+   Body / caption: Verdana Regular. Values are the kit's desktop scale;
+   the responsive + mobile scales are exposed as -rsp / -mob tokens. */
+:root{
+  --h1-size:42px;  --h1-line:50px;
+  --h2-size:34px;  --h2-line:42px;
+  --h3-size:26px;  --h3-line:34px;
+  --h4-size:22px;  --h4-line:32px;
+  --h5-size:20px;  --h5-line:26px;
+  --h6-size:16px;  --h6-line:22px;
+
+  --description-size:20px; --description-line:24px;
+  --body-1-size:15px;      --body-1-line:22px;
+  --body-2-size:14px;      --body-2-line:22px;
+  --caption-size:12px;     --caption-line:20px;
+
+  /* Responsive (tablet) scale */
+  --h1-size-rsp:34px; --h1-line-rsp:42px;
+  --h2-size-rsp:26px; --h2-line-rsp:34px;
+  --h3-size-rsp:22px; --h3-line-rsp:32px;
+  --h4-size-rsp:20px; --h4-line-rsp:26px;
+  --h5-size-rsp:18px; --h5-line-rsp:24px;
+  --h6-size-rsp:16px; --h6-line-rsp:22px;
+  --description-size-rsp:18px; --description-line-rsp:22px;
+
+  /* Mobile scale */
+  --h1-size-mob:34px; --h1-line-mob:42px;
+  --h2-size-mob:26px; --h2-line-mob:34px;
+  --h3-size-mob:22px; --h3-line-mob:32px;
+  --h4-size-mob:20px; --h4-line-mob:26px;
+  --h5-size-mob:18px; --h5-line-mob:24px;
+  --h6-size-mob:16px; --h6-line-mob:22px;
+  --description-size-mob:22px; --description-line-mob:32px;
+
+  --text-heading-weight:700;
+  --text-description-weight:600;
+}

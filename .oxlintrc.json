@@ -1,0 +1,3 @@
+{
+  "ignorePatterns": ["src/ds/_ds_bundle.js", "dist"]
+}

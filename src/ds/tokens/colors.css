@@ -1,0 +1,96 @@
+/* Paleta GOV.CO - Kit UI 9.2 (values sampled from the official kit) */
+:root{
+  /* Principales */
+  --color-cobalt:#0943B5;
+  --color-black:#000000;
+  --color-matterhorn:#4C4C4C;
+  --color-grey:#7E7E7E;
+  --color-white:#FFFFFF;
+
+  /* Complementarios */
+  --color-havelock-blue:#4672C8;
+  --color-tropical-blue:#B5C7E9;
+  --color-golden-brown:#9D7700;
+  --color-sunglow:#FECC2F;
+  --color-vis-vis:#FEE697;
+
+  /* Campos deshabilitados */
+  --color-silver:#B9B9B9;
+
+  /* Fondos */
+  --color-solitude:#E5ECF8;
+  --color-corn-silk:#FFFAE8;
+  --color-white-smoke:#F4F4F4;
+  --color-portage:#83A0DA;
+
+  /* Universales informativos */
+  --color-green:#158361;
+  --color-yellow:#FDAA29;
+  --color-orange:#F0572D;
+  --color-red:#A80521;
+
+  /* Semantic aliases -------------------------------------------------- */
+  --interactive-primary:var(--color-cobalt);
+  --interactive-primary-hover:var(--color-havelock-blue);
+  --interactive-primary-focus-ring:var(--color-black);
+  --interactive-disabled:var(--color-silver);
+  --interactive-inverse:var(--color-white);
+
+  --text-title:var(--color-black);
+  --text-body:var(--color-matterhorn);
+  --text-muted:var(--color-grey);
+  --text-inverse:var(--color-white);
+  --text-link:var(--color-cobalt);
+  --text-link-visited:var(--color-golden-brown);
+  --text-link-hover:var(--color-havelock-blue);
+  --text-disabled:var(--color-grey);
+  --text-on-primary:var(--color-white);
+
+  --surface-page:var(--color-white);
+  --surface-card:var(--color-white);
+  --surface-subtle:var(--color-white-smoke);
+  --surface-info:var(--color-solitude);
+  --surface-notice:var(--color-corn-silk);
+  --surface-brand:var(--color-cobalt);
+  --surface-overlay:rgba(0,0,0,.2);
+  --surface-tooltip:var(--color-matterhorn);
+
+  --border-default:var(--color-grey);
+  --border-subtle:#D4D4D4;
+  --border-strong:var(--color-black);
+  --border-brand:var(--color-cobalt);
+  --border-disabled:var(--color-silver);
+
+  --feedback-success:var(--color-green);
+  --feedback-warning:var(--color-yellow);
+  --feedback-attention:var(--color-orange);
+  --feedback-error:var(--color-red);
+  --feedback-error-text:#D23C46;
+
+  /* Entity accent: each entity paints its header rule, footer band and
+     nav underline with its own ministry colour. Default = MinTIC. */
+  --entity-accent:#E8A046;
+}
+
+/* Paleta de colores de los Ministerios (Manual de imagen de Gobierno) */
+:root{
+  --ministry-interior:#D23C46;
+  --ministry-cancilleria:#1E3764;
+  --ministry-hacienda:#B28D42;
+  --ministry-justicia:#235087;
+  --ministry-defensa:#3C87B4;
+  --ministry-agricultura:#C8A041;
+  --ministry-salud:#73B9AF;
+  --ministry-trabajo:#681D35;
+  --ministry-energia:#E6B43C;
+  --ministry-comercio:#962D46;
+  --ministry-educacion:#B43737;
+  --ministry-ambiente:#96BE55;
+  --ministry-vivienda:#43B2D7;
+  --ministry-tic:#E8A046;
+  --ministry-transporte:#DC7240;
+  --ministry-cultura:#4B3C8C;
+  --ministry-ciencias:#2D6437;
+  --ministry-deportes:#4B5599;
+  --ministry-igualdad:#D23C78;
+}

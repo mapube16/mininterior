@@ -1,0 +1,263 @@
+/* GOV.CO Kit UI 9.2 — component classes. Flat system: 1px borders, no gradients. */
+
+/* ---------- Botones ---------- */
+.govco-btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--body-1-size);line-height:1;text-decoration:none;border:var(--border-width-strong) solid transparent;border-radius:var(--radius-sm);cursor:pointer;transition:background var(--motion-fast) var(--easing-standard),color var(--motion-fast) var(--easing-standard),border-color var(--motion-fast) var(--easing-standard);min-height:var(--touch-target-min);padding:0 var(--space-5)}
+.govco-btn--sm{min-height:36px;padding:0 var(--space-4);font-size:var(--body-2-size)}
+.govco-btn--lg{min-height:56px;padding:0 var(--space-6);font-size:var(--h6-size)}
+.govco-btn--icon{padding:0;width:var(--touch-target-min);aspect-ratio:1}
+.govco-btn__icon{display:inline-flex;align-items:center;justify-content:center;font-size:var(--icon-size-md);line-height:1}
+.govco-btn:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-btn:disabled,.govco-btn[aria-disabled="true"]{cursor:not-allowed}
+.govco-btn--filled{background:var(--interactive-primary);color:var(--text-on-primary);border-color:var(--interactive-primary)}
+.govco-btn--filled:hover:not(:disabled){background:var(--interactive-primary-hover);border-color:var(--interactive-primary-hover)}
+.govco-btn--filled:disabled{background:var(--interactive-disabled);border-color:var(--interactive-disabled);color:var(--color-white)}
+.govco-btn--filled.govco-btn--inverse{background:var(--color-white);color:var(--interactive-primary);border-color:var(--color-white)}
+.govco-btn--filled.govco-btn--inverse:hover:not(:disabled){background:var(--color-tropical-blue);border-color:var(--color-tropical-blue)}
+.govco-btn--filled.govco-btn--inverse:focus-visible{outline-color:var(--color-white)}
+.govco-btn--outline{background:transparent;color:var(--interactive-primary);border-color:var(--interactive-primary)}
+.govco-btn--outline:hover:not(:disabled){background:var(--surface-info);color:var(--interactive-primary-hover);border-color:var(--interactive-primary-hover)}
+.govco-btn--outline:disabled{color:var(--interactive-disabled);border-color:var(--interactive-disabled)}
+.govco-btn--outline.govco-btn--inverse{color:var(--color-white);border-color:var(--color-white)}
+.govco-btn--outline.govco-btn--inverse:hover:not(:disabled){background:rgba(255,255,255,.14);color:var(--color-white);border-color:var(--color-white)}
+.govco-btn--outline.govco-btn--inverse:focus-visible{outline-color:var(--color-white)}
+.govco-btn--text{background:transparent;color:var(--interactive-primary);border-color:transparent;padding-left:var(--space-2);padding-right:var(--space-2)}
+.govco-btn--text:hover:not(:disabled){color:var(--interactive-primary-hover);text-decoration:underline}
+.govco-btn--text:disabled{color:var(--interactive-disabled)}
+.govco-btn--text.govco-btn--inverse{color:var(--color-white)}
+.govco-btn--text.govco-btn--inverse:focus-visible{outline-color:var(--color-white)}
+
+/* ---------- Componentes de formulario ---------- */
+.govco-field{display:flex;flex-direction:column;gap:var(--space-2);font-family:var(--font-body)}
+.govco-label{font-family:var(--font-heading);font-weight:var(--font-weight-semibold);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-title)}
+.govco-label__req{color:var(--feedback-error)}
+.govco-input,.govco-select__control,.govco-textarea{font-family:var(--font-body);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-title);background:var(--surface-card);border:var(--border-width) solid var(--border-default);border-radius:var(--radius-sm);padding:var(--space-3) var(--space-4);min-height:var(--touch-target-min);width:100%;box-sizing:border-box;transition:border-color var(--motion-fast) var(--easing-standard)}
+.govco-textarea{min-height:120px;resize:vertical}
+.govco-input::placeholder,.govco-textarea::placeholder{color:var(--text-muted)}
+.govco-input:hover:not(:disabled),.govco-textarea:hover:not(:disabled){border-color:var(--interactive-primary)}
+.govco-input:focus-visible,.govco-textarea:focus-visible,.govco-select__control:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:0;border-color:var(--interactive-primary)}
+.govco-input:disabled,.govco-textarea:disabled{background:var(--surface-subtle);border-color:var(--border-disabled);color:var(--text-disabled);cursor:not-allowed}
+.govco-field--error .govco-input,.govco-field--error .govco-textarea,.govco-field--error .govco-select__control{border-color:var(--feedback-error);border-width:var(--border-width-strong)}
+.govco-help{font-size:var(--caption-size);line-height:var(--caption-line);color:var(--text-muted)}
+.govco-error{display:flex;gap:var(--space-1);align-items:flex-start;font-size:var(--caption-size);line-height:var(--caption-line);color:var(--feedback-error)}
+.govco-counter{align-self:flex-end;font-size:var(--caption-size);color:var(--text-muted)}
+.govco-select{position:relative;font-family:var(--font-body)}
+.govco-select__control{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);text-align:left;cursor:pointer}
+.govco-select__control[aria-expanded="true"]{border-color:var(--interactive-primary)}
+.govco-select__caret{color:var(--interactive-primary);font-size:var(--caption-size)}
+.govco-select__value--empty{color:var(--text-muted)}
+.govco-select__list{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;margin:0;padding:var(--space-1) 0;list-style:none;background:var(--surface-card);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);max-height:240px;overflow:auto}
+.govco-select__option{padding:var(--space-3) var(--space-4);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body);cursor:pointer}
+.govco-select__option:hover{background:var(--surface-info);color:var(--text-title)}
+.govco-select__option[aria-selected="true"]{background:var(--surface-info);color:var(--interactive-primary);font-weight:var(--font-weight-bold)}
+.govco-choice{display:flex;gap:var(--space-3);align-items:flex-start;font-family:var(--font-body);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body);min-height:var(--touch-target-min);padding:var(--space-2) 0;cursor:pointer}
+.govco-choice input{appearance:none;margin:0;flex:none;width:20px;height:20px;border:var(--border-width-strong) solid var(--border-default);background:var(--surface-card);cursor:pointer;position:relative;top:1px}
+.govco-choice--radio input{border-radius:var(--radius-pill)}
+.govco-choice--check input{border-radius:var(--radius-sm)}
+.govco-choice input:hover{border-color:var(--interactive-primary)}
+.govco-choice input:checked{border-color:var(--interactive-primary)}
+.govco-choice--radio input:checked::after{content:"";position:absolute;inset:3px;border-radius:var(--radius-pill);background:var(--interactive-primary)}
+.govco-choice--check input:checked{background:var(--interactive-primary)}
+.govco-choice--check input:checked::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid var(--color-white);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.govco-choice input:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-choice input:disabled{border-color:var(--border-disabled);background:var(--surface-subtle);cursor:not-allowed}
+.govco-choice--disabled{color:var(--text-disabled);cursor:not-allowed}
+.govco-dropzone{display:flex;flex-direction:column;align-items:center;gap:var(--space-3);padding:var(--space-6);text-align:center;border:var(--border-width-strong) dashed var(--border-default);border-radius:var(--radius-md);background:var(--surface-subtle);font-family:var(--font-body)}
+.govco-dropzone--over{border-color:var(--interactive-primary);background:var(--surface-info)}
+.govco-file{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) var(--space-4);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-sm);background:var(--surface-card);font-size:var(--body-2-size)}
+
+/* ---------- Buscador ---------- */
+.govco-search{position:relative;font-family:var(--font-body)}
+.govco-search__row{display:flex;align-items:stretch}
+.govco-search__input{flex:1;min-width:0;font-family:var(--font-body);font-size:var(--body-1-size);color:var(--text-title);background:var(--surface-card);border:var(--border-width) solid var(--border-default);border-right:0;border-radius:var(--radius-sm) 0 0 var(--radius-sm);padding:var(--space-3) var(--space-4);min-height:var(--touch-target-min)}
+.govco-search__input::placeholder{color:var(--text-muted)}
+.govco-search__input:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:0}
+.govco-search__btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--space-2);min-width:var(--touch-target-min);padding:0 var(--space-5);background:var(--interactive-primary);color:var(--color-white);border:var(--border-width-strong) solid var(--interactive-primary);border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-family:var(--font-heading);font-weight:var(--font-weight-bold);cursor:pointer}
+.govco-search__btn:hover{background:var(--interactive-primary-hover);border-color:var(--interactive-primary-hover)}
+.govco-search__btn:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-search__clear{position:absolute;right:calc(var(--space-11) + var(--space-2));top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--text-muted);cursor:pointer;font-size:var(--body-1-size);line-height:1;padding:var(--space-2)}
+.govco-search__suggestions{list-style:none;margin:4px 0 0;padding:var(--space-1) 0;background:var(--surface-card);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);position:absolute;left:0;right:0;z-index:20}
+.govco-search__suggestion{display:flex;gap:var(--space-3);align-items:center;padding:var(--space-3) var(--space-4);font-size:var(--body-1-size);color:var(--text-body);cursor:pointer}
+.govco-search__suggestion:hover{background:var(--surface-info)}
+.govco-search__suggestion mark{background:transparent;color:var(--text-title);font-weight:var(--font-weight-bold)}
+
+/* ---------- Barra superior / accesibilidad / cabecera ---------- */
+.govco-topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--space-5);height:var(--topbar-height);padding:0 var(--space-7);background:var(--surface-brand)}
+.govco-topbar__logo{display:inline-flex;align-items:center;min-height:var(--touch-target-min);min-width:var(--touch-target-min)}
+.govco-topbar__logo img{width:var(--logo-govco-width);height:var(--logo-govco-height);display:block}
+.govco-topbar__lang{display:inline-flex;align-items:center;gap:var(--space-2);background:transparent;border:var(--border-width-strong) solid transparent;color:var(--color-white);font-family:var(--font-heading);font-weight:var(--font-weight-semibold);font-size:var(--body-2-size);min-height:var(--touch-target-min);padding:0 var(--space-3);border-radius:var(--radius-sm);cursor:pointer}
+.govco-topbar__lang:hover{border-color:var(--color-white)}
+.govco-topbar__lang:focus-visible{outline:var(--focus-ring-width) solid var(--color-white);outline-offset:var(--focus-ring-offset)}
+.govco-a11y{display:flex;align-items:center;gap:var(--space-1);background:var(--surface-card);border:var(--border-width) solid var(--border-subtle);border-radius:var(--radius-sm);padding:var(--space-1)}
+.govco-a11y__btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:var(--touch-target-min);min-height:var(--touch-target-min);padding:var(--space-1) var(--space-2);background:transparent;border:var(--border-width-strong) solid transparent;border-radius:var(--radius-sm);color:var(--interactive-primary);font-family:var(--font-body);font-size:var(--caption-size);line-height:var(--caption-line);cursor:pointer}
+.govco-a11y__btn:hover{background:var(--surface-info)}
+.govco-a11y__btn:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-a11y__btn[aria-pressed="true"]{background:var(--interactive-primary);color:var(--color-white)}
+.govco-a11y__glyph{font-size:var(--icon-size-md);line-height:1}
+.govco-header{background:var(--surface-card);border-bottom:var(--entity-rule-width) solid var(--entity-accent)}
+.govco-header__main{display:flex;align-items:center;justify-content:space-between;gap:var(--space-6);padding:var(--space-5) var(--space-7)}
+.govco-header__brand{display:flex;align-items:center;gap:var(--space-4);min-width:0}
+.govco-header__seal{width:56px;height:56px;flex:none;background:var(--surface-info);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:var(--interactive-primary);font-family:var(--font-heading);font-weight:var(--font-weight-bold)}
+.govco-header__entity{font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--h5-size);line-height:var(--h5-line);color:var(--text-title)}
+.govco-header__sub{font-size:var(--body-2-size);line-height:var(--body-2-line);color:var(--text-muted)}
+.govco-header__tools{display:flex;align-items:center;gap:var(--space-4)}
+.govco-nav{display:flex;align-items:stretch;gap:var(--space-6);padding:0 var(--space-7);border-top:var(--border-width) solid var(--border-subtle)}
+.govco-nav__link{display:inline-flex;align-items:center;min-height:var(--touch-target-min);padding:var(--space-3) 0;font-family:var(--font-heading);font-weight:var(--font-weight-semibold);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body);text-decoration:none;border-bottom:var(--entity-rule-width) solid transparent}
+.govco-nav__link:hover{color:var(--interactive-primary);border-bottom-color:var(--color-tropical-blue)}
+.govco-nav__link[aria-current="page"]{color:var(--interactive-primary);border-bottom-color:var(--interactive-primary)}
+.govco-nav__link:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+
+/* ---------- Pie de página ---------- */
+.govco-footer{background:var(--surface-brand);color:var(--text-inverse);font-family:var(--font-body)}
+.govco-footer__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--space-6);padding:var(--space-8) var(--space-7)}
+.govco-footer h2,.govco-footer h3{color:var(--text-inverse)}
+.govco-footer__title{font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--h5-size);line-height:var(--h5-line);margin:0 0 var(--space-3)}
+.govco-footer__sub{font-family:var(--font-heading);font-weight:var(--font-weight-semibold);font-size:var(--body-1-size);margin:0 0 var(--space-2)}
+.govco-footer__line{font-size:var(--body-2-size);line-height:var(--body-2-line);color:var(--text-inverse);opacity:.92;margin:0 0 var(--space-1)}
+.govco-footer a{color:var(--text-inverse);text-decoration:underline}
+.govco-footer a:visited{color:var(--text-inverse)}
+.govco-footer a:hover{color:var(--color-tropical-blue)}
+.govco-footer__links{display:flex;flex-wrap:wrap;gap:var(--space-5);padding:var(--space-4) var(--space-7);border-top:var(--border-width) solid rgba(255,255,255,.32);font-size:var(--body-2-size)}
+.govco-footer__band{display:flex;align-items:center;justify-content:space-between;gap:var(--space-5);flex-wrap:wrap;padding:var(--space-5) var(--space-7);background:var(--entity-accent)}
+.govco-footer__seals{display:flex;align-items:center;gap:var(--space-5)}
+.govco-footer__seal{background:var(--color-white);color:var(--interactive-primary);font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--body-2-size);padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm)}
+
+/* ---------- Miga de pan ---------- */
+.govco-breadcrumb{font-family:var(--font-body);font-size:var(--body-2-size);line-height:var(--body-2-line)}
+.govco-breadcrumb ol{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2);list-style:none;margin:0;padding:0}
+.govco-breadcrumb__sep{color:var(--text-muted)}
+.govco-breadcrumb a{color:var(--text-link)}
+.govco-breadcrumb [aria-current="page"]{color:var(--text-muted)}
+
+/* ---------- Acordeón ---------- */
+.govco-accordion{border-top:var(--border-width) solid var(--border-subtle)}
+.govco-accordion__item{border-bottom:var(--border-width) solid var(--border-subtle)}
+.govco-accordion__trigger{display:flex;align-items:center;gap:var(--space-4);width:100%;padding:var(--space-4) var(--space-2);background:transparent;border:0;text-align:left;cursor:pointer;font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--h6-size);line-height:var(--h6-line);color:var(--text-title);min-height:var(--touch-target-min)}
+.govco-accordion__trigger:hover{color:var(--interactive-primary)}
+.govco-accordion__trigger:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:calc(var(--focus-ring-offset) * -1)}
+.govco-accordion__trigger[aria-expanded="true"]{color:var(--interactive-primary)}
+.govco-accordion__trigger:disabled{color:var(--text-disabled);cursor:not-allowed}
+.govco-accordion__marker{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--radius-pill);background:var(--surface-info);color:var(--interactive-primary);font-size:var(--body-1-size)}
+.govco-accordion__caret{margin-left:auto;color:var(--interactive-primary);font-size:var(--body-2-size);transition:transform var(--motion-base) var(--easing-standard)}
+.govco-accordion__trigger[aria-expanded="true"] .govco-accordion__caret{transform:rotate(180deg)}
+.govco-accordion__panel{padding:0 var(--space-2) var(--space-5) var(--space-2);font-family:var(--font-body);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body)}
+.govco-accordion__panel h4{font-size:var(--h6-size);line-height:var(--h6-line);margin:0 0 var(--space-2)}
+
+/* ---------- Alertas y notificaciones ---------- */
+.govco-banner{display:flex;align-items:flex-start;gap:var(--space-4);padding:var(--space-4) var(--space-7);font-family:var(--font-body);font-size:var(--body-1-size);line-height:var(--body-1-line);border-left:var(--entity-rule-width) solid var(--feedback-success);background:var(--surface-subtle);color:var(--text-body)}
+.govco-banner__icon{flex:none;font-size:var(--icon-size-md);line-height:1}
+.govco-banner--info{border-left-color:var(--interactive-primary);background:var(--surface-info)}
+.govco-banner--success{border-left-color:var(--feedback-success);background:#E8F5F0}
+.govco-banner--warning{border-left-color:var(--feedback-warning);background:var(--surface-notice)}
+.govco-banner--error{border-left-color:var(--feedback-error);background:#FBEAEC}
+.govco-banner__close{margin-left:auto;background:transparent;border:0;color:var(--text-body);cursor:pointer;min-width:var(--touch-target-min);min-height:var(--touch-target-min)}
+.govco-toast{display:flex;gap:var(--space-4);align-items:flex-start;width:360px;max-width:100%;padding:var(--space-4);background:var(--surface-card);border:var(--border-width) solid var(--border-subtle);border-top:var(--entity-rule-width) solid var(--interactive-primary);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);font-family:var(--font-body)}
+.govco-toast--success{border-top-color:var(--feedback-success)}
+.govco-toast--error{border-top-color:var(--feedback-error)}
+.govco-toast__icon{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--radius-pill);color:var(--color-white);background:var(--interactive-primary);font-size:var(--body-1-size)}
+.govco-toast--success .govco-toast__icon{background:var(--feedback-success)}
+.govco-toast--error .govco-toast__icon{background:var(--feedback-error)}
+.govco-toast__head{display:flex;align-items:baseline;gap:var(--space-3);margin-bottom:var(--space-1)}
+.govco-toast__title{font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--body-1-size);color:var(--text-title)}
+.govco-toast__time{font-size:var(--caption-size);color:var(--text-muted);margin-left:auto;white-space:nowrap}
+.govco-toast__body{font-size:var(--body-2-size);line-height:var(--body-2-line);color:var(--text-body)}
+.govco-toast__close{background:transparent;border:0;color:var(--text-muted);cursor:pointer;padding:var(--space-1)}
+
+/* ---------- Alerta modal ---------- */
+.govco-modal__overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:var(--space-5);background:rgba(0,0,0,.45);z-index:100}
+.govco-modal{width:560px;max-width:100%;background:var(--surface-card);border-radius:var(--radius-md);box-shadow:var(--shadow-lg);overflow:hidden;font-family:var(--font-body)}
+.govco-modal__bar{height:var(--entity-rule-width);background:var(--interactive-primary)}
+.govco-modal--success .govco-modal__bar{background:var(--feedback-success)}
+.govco-modal--warning .govco-modal__bar{background:var(--feedback-warning)}
+.govco-modal--error .govco-modal__bar{background:var(--feedback-error)}
+.govco-modal__body{display:flex;gap:var(--space-4);padding:var(--space-6) var(--space-6) var(--space-4)}
+.govco-modal__icon{flex:none;display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:var(--radius-pill);background:var(--surface-info);color:var(--interactive-primary);font-size:var(--h5-size)}
+.govco-modal--success .govco-modal__icon{background:#E8F5F0;color:var(--feedback-success)}
+.govco-modal--warning .govco-modal__icon{background:var(--surface-notice);color:var(--color-golden-brown)}
+.govco-modal--error .govco-modal__icon{background:#FBEAEC;color:var(--feedback-error)}
+.govco-modal__title{font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--h4-size);line-height:var(--h4-line);color:var(--text-title);margin:0 0 var(--space-2)}
+.govco-modal__text{font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body);margin:0}
+.govco-modal__actions{display:flex;justify-content:flex-end;gap:var(--space-4);padding:var(--space-4) var(--space-6) var(--space-6)}
+.govco-modal__close{position:absolute;top:var(--space-4);right:var(--space-4);background:transparent;border:0;color:var(--text-muted);font-size:var(--h6-size);cursor:pointer;min-width:var(--touch-target-min);min-height:var(--touch-target-min)}
+@media (max-width:576px){.govco-modal__actions{flex-direction:column-reverse}.govco-modal__actions .govco-btn{width:100%}}
+
+/* ---------- Pestañas ---------- */
+.govco-tabs__list{display:flex;gap:var(--space-6);border-bottom:var(--border-width) solid var(--border-subtle);overflow-x:auto}
+.govco-tab{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-3) var(--space-1);min-height:var(--touch-target-min);background:transparent;border:0;border-bottom:var(--entity-rule-width) solid transparent;font-family:var(--font-heading);font-weight:var(--font-weight-semibold);font-size:var(--body-1-size);color:var(--text-body);cursor:pointer;white-space:nowrap}
+.govco-tab:hover{color:var(--interactive-primary);border-bottom-color:var(--color-tropical-blue)}
+.govco-tab[aria-selected="true"]{color:var(--interactive-primary);border-bottom-color:var(--interactive-primary);font-weight:var(--font-weight-bold)}
+.govco-tab:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-tab:disabled{color:var(--text-disabled);cursor:not-allowed}
+.govco-tabs__panel{padding:var(--space-5) var(--space-1);font-family:var(--font-body);font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body)}
+
+/* ---------- Paginación ---------- */
+.govco-pagination{display:flex;align-items:center;gap:var(--space-2);font-family:var(--font-body)}
+.govco-page{display:inline-flex;align-items:center;justify-content:center;min-width:var(--touch-target-min);min-height:var(--touch-target-min);padding:0 var(--space-2);background:transparent;border:var(--border-width) solid transparent;border-radius:var(--radius-sm);color:var(--interactive-primary);font-size:var(--body-1-size);cursor:pointer}
+.govco-page:hover:not(:disabled){background:var(--surface-info)}
+.govco-page[aria-current="page"]{background:var(--interactive-primary);border-color:var(--interactive-primary);color:var(--color-white);font-weight:var(--font-weight-bold)}
+.govco-page:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-page:disabled{color:var(--text-disabled);cursor:not-allowed}
+.govco-pagination__ellipsis{color:var(--text-muted);padding:0 var(--space-1)}
+
+/* ---------- Tablas ---------- */
+.govco-table{width:100%;border-collapse:collapse;font-family:var(--font-body);font-size:var(--body-1-size)}
+.govco-table caption{text-align:left;font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--h5-size);line-height:var(--h5-line);color:var(--text-title);padding-bottom:var(--space-4)}
+.govco-table th{text-align:left;background:var(--interactive-primary);color:var(--color-white);font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--body-1-size);padding:var(--space-4)}
+.govco-table td{padding:var(--space-4);border-bottom:var(--border-width) solid var(--border-subtle);color:var(--text-body);vertical-align:top}
+.govco-table tbody tr:nth-child(even) td{background:var(--surface-subtle)}
+.govco-table--flat tbody tr:nth-child(even) td{background:transparent}
+.govco-table tbody tr:hover td{background:var(--surface-info)}
+.govco-table__sort{display:inline-flex;align-items:center;gap:var(--space-2);background:transparent;border:0;color:inherit;font:inherit;cursor:pointer}
+
+/* ---------- Tarjeta de información ---------- */
+.govco-card{display:flex;flex-direction:column;gap:var(--space-3);padding:var(--space-5);background:var(--surface-card);border:var(--border-width) solid var(--border-subtle);border-top:var(--entity-rule-width) solid var(--interactive-primary);border-radius:var(--radius-sm);font-family:var(--font-body)}
+.govco-card--linked{transition:box-shadow var(--motion-base) var(--easing-standard),transform var(--motion-base) var(--easing-standard);text-decoration:none;color:inherit}
+.govco-card--linked:hover{box-shadow:var(--shadow-md)}
+.govco-card__eyebrow{font-size:var(--caption-size);line-height:var(--caption-line);letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted)}
+.govco-card__title{font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--h5-size);line-height:var(--h5-line);color:var(--text-title);margin:0}
+.govco-card__text{font-size:var(--body-1-size);line-height:var(--body-1-line);color:var(--text-body);margin:0}
+.govco-card__foot{display:flex;align-items:center;gap:var(--space-4);margin-top:var(--space-2)}
+.govco-card__icon{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:var(--radius-sm);background:var(--surface-info);color:var(--interactive-primary);font-size:var(--h5-size)}
+
+/* ---------- Etiquetas ---------- */
+.govco-tag{display:inline-flex;align-items:center;gap:var(--space-2);padding:var(--space-1) var(--space-3);border-radius:var(--radius-pill);background:var(--surface-info);color:var(--interactive-primary);font-family:var(--font-body);font-size:var(--body-2-size);line-height:var(--body-2-line);border:var(--border-width) solid transparent}
+.govco-tag--outline{background:transparent;border-color:var(--interactive-primary)}
+.govco-tag--neutral{background:var(--surface-subtle);color:var(--text-body)}
+.govco-tag--success{background:#E8F5F0;color:var(--feedback-success)}
+.govco-tag--warning{background:var(--surface-notice);color:var(--color-golden-brown)}
+.govco-tag--error{background:#FBEAEC;color:var(--feedback-error)}
+.govco-tag--interactive{cursor:pointer}
+.govco-tag--interactive:hover{background:var(--color-tropical-blue)}
+.govco-tag__remove{background:transparent;border:0;color:inherit;cursor:pointer;font-size:var(--caption-size);padding:0 0 0 var(--space-1)}
+
+/* ---------- Descripción emergente ---------- */
+.govco-tooltip{position:relative;display:inline-flex}
+.govco-tooltip__bubble{position:absolute;z-index:30;background:var(--surface-tooltip);color:var(--text-inverse);font-family:var(--font-body);font-size:var(--body-2-size);line-height:var(--body-2-line);padding:var(--space-3) var(--space-4);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);width:max-content;max-width:260px}
+.govco-tooltip__bubble--top{bottom:calc(100% + 10px);left:50%;transform:translateX(-50%)}
+.govco-tooltip__bubble--bottom{top:calc(100% + 10px);left:50%;transform:translateX(-50%)}
+.govco-tooltip__bubble--right{left:calc(100% + 10px);top:50%;transform:translateY(-50%)}
+.govco-tooltip__bubble--left{right:calc(100% + 10px);top:50%;transform:translateY(-50%)}
+.govco-tooltip__arrow{position:absolute;width:8px;height:8px;background:var(--surface-tooltip);transform:rotate(45deg)}
+.govco-tooltip__trigger{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:var(--radius-pill);border:var(--border-width-strong) solid var(--interactive-primary);background:transparent;color:var(--interactive-primary);font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--caption-size);cursor:pointer}
+.govco-tooltip__trigger:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+
+/* ---------- Línea de avance / indicador de carga ---------- */
+.govco-steps{display:flex;align-items:flex-start;font-family:var(--font-body)}
+.govco-step{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);flex:1;text-align:center;position:relative}
+.govco-step__dot{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--radius-pill);border:var(--border-width-strong) solid var(--border-default);background:var(--surface-card);color:var(--text-muted);font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--body-2-size);z-index:1}
+.govco-step--done .govco-step__dot{background:var(--interactive-primary);border-color:var(--interactive-primary);color:var(--color-white)}
+.govco-step--current .govco-step__dot{border-color:var(--interactive-primary);color:var(--interactive-primary);box-shadow:0 0 0 4px var(--surface-info)}
+.govco-step__label{font-size:var(--body-2-size);line-height:var(--body-2-line);color:var(--text-body);max-width:14ch}
+.govco-step--current .govco-step__label{color:var(--interactive-primary);font-weight:var(--font-weight-bold)}
+.govco-step__bar{position:absolute;top:15px;left:50%;width:100%;height:2px;background:var(--border-subtle)}
+.govco-step--done .govco-step__bar{background:var(--interactive-primary)}
+.govco-progress{width:100%;height:8px;border-radius:var(--radius-pill);background:var(--surface-subtle);overflow:hidden}
+.govco-progress__fill{height:100%;background:var(--interactive-primary);border-radius:var(--radius-pill);transition:width var(--motion-slow) var(--easing-standard)}
+.govco-spinner{width:40px;height:40px;border-radius:var(--radius-pill);border:4px solid var(--surface-info);border-top-color:var(--interactive-primary);animation:govco-spin 900ms linear infinite}
+.govco-spinner--sm{width:24px;height:24px;border-width:3px}
+@keyframes govco-spin{to{transform:rotate(360deg)}}
+
+/* ---------- Volver arriba ---------- */
+.govco-backtotop{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:64px;height:64px;border-radius:var(--radius-pill);background:var(--interactive-primary);color:var(--color-white);border:var(--border-width-strong) solid var(--interactive-primary);font-family:var(--font-heading);font-weight:var(--font-weight-bold);font-size:var(--caption-size);line-height:var(--caption-line);cursor:pointer;box-shadow:var(--shadow-md)}
+.govco-backtotop:hover{background:var(--interactive-primary-hover);border-color:var(--interactive-primary-hover)}
+.govco-backtotop:focus-visible{outline:var(--focus-ring-width) solid var(--border-strong);outline-offset:var(--focus-ring-offset)}
+.govco-backtotop--fixed{position:fixed;right:var(--space-6);bottom:var(--space-6);z-index:40}

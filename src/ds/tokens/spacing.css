@@ -1,0 +1,36 @@
+/* Spacing is built on multiples of 8 (graphic elements) and 4 (icons).
+   Grid: Bootstrap 5, 12 columns, 24px gutters. */
+:root{
+  --space-0:0;
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:24px;
+  --space-6:32px;
+  --space-7:40px;
+  --space-8:48px;
+  --space-9:56px;
+  --space-10:64px;
+  --space-11:80px;
+  --space-12:96px;
+
+  --grid-columns:12; /* @kind other */
+  --grid-gutter:24px;
+  --container-max:1400px;
+
+  --bp-sm:576px;
+  --bp-md:768px;
+  --bp-lg:992px;
+  --bp-xl:1200px;
+  --bp-xxl:1400px;
+
+  /* Fixed component heights defined by the kit */
+  --topbar-height:56px;
+  --touch-target-min:44px;
+  --logo-govco-width:136px;
+  --logo-govco-height:24px;
+  --icon-size-sm:16px;
+  --icon-size-md:24px;
+  --icon-size-lg:32px;
+}

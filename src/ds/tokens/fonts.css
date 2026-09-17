@@ -1,0 +1,14 @@
+/* GOV.CO Kit UI 9.2 uses exactly two typefaces:
+   Nunito Sans -> headings, section descriptions (Google Fonts, variable)
+   Verdana     -> paragraphs, captions, form text (system font, no webfont file shipped;
+                  fallbacks are metric-compatible generics, no named webfonts) */
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
+
+:root{
+  --font-heading:"Nunito Sans","Nunito Sans Fallback",system-ui,sans-serif;
+  --font-body:Verdana,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --font-weight-regular:400;
+  --font-weight-semibold:600;
+  --font-weight-bold:700;
+}
