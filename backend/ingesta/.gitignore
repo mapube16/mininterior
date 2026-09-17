@@ -1,0 +1,5 @@
+# El repo es público: ningún dato real entra aquí.
+*.xlsx
+*.csv
+*.json
+salidas/
