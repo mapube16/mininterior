@@ -4,6 +4,7 @@ import Layout, { Migas } from '../components/Layout.jsx'
 import { MapaMunicipio } from '../components/MapaConsulta.jsx'
 import { Parrafo, Vacio } from '../components/ui.jsx'
 import { buscarComunidad, ESTADOS } from '../mock/datos.js'
+import { useDatos } from '../api/useDatos.js'
 import { R } from '../routes.js'
 
 // Fechas y acto administrativo del prototipo: el mock no las trae por comunidad.
@@ -24,7 +25,14 @@ const flecha = (
 
 export default function P3Comunidad() {
   const { id } = useParams()
-  const c = buscarComunidad(id)
+  // Del backend si está configurado; si no, los datos de ejemplo.
+  const { datos: c, cargando } = useDatos(
+    (api) => api.comunidad(id),
+    buscarComunidad(id),
+    [id]
+  )
+
+  if (cargando && !c) return <Layout ancho={1080} />
 
   if (!c) {
     return (

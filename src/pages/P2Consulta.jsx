@@ -5,7 +5,8 @@ import { Button, SearchBar, Select } from '../ds/index.js'
 import Layout, { Migas } from '../components/Layout.jsx'
 import MapaConsulta from '../components/MapaConsulta.jsx'
 import { Estado, Mudo, Parrafo } from '../components/ui.jsx'
-import { COMUNIDADES, DEPARTAMENTOS, TIPOS_ORGANIZACION, ESTADOS } from '../mock/datos.js'
+import { COMUNIDADES as MOCK, TIPOS_ORGANIZACION, ESTADOS } from '../mock/datos.js'
+import { useDatos } from '../api/useDatos.js'
 import { R, ruta } from '../routes.js'
 
 const TODOS = 'Todos'
@@ -13,6 +14,8 @@ const ESTADOS_REGISTRO = ['Vigente', 'En actualización', 'Pendiente', 'Requiere
 
 export default function P2Consulta() {
   const [params] = useSearchParams()
+  // Del backend si está configurado; si no, los datos de ejemplo.
+  const { datos: COMUNIDADES } = useDatos((api) => api.comunidades(), MOCK)
   const [texto, setTexto] = useState(params.get('q') ?? '')
   const [departamento, setDepartamento] = useState(TODOS)
   const [municipio, setMunicipio] = useState(TODOS)
@@ -22,10 +25,15 @@ export default function P2Consulta() {
   const [hoverId, setHoverId] = useState(null)
   const [mapaOk, setMapaOk] = useState(true) // el prototipo modela una falla real de la capa de mapas
 
+  const DEPARTAMENTOS = useMemo(
+    () => [...new Set(COMUNIDADES.map((c) => c.departamento))].sort(),
+    [COMUNIDADES]
+  )
+
   const municipios = useMemo(() => {
     const base = departamento === TODOS ? COMUNIDADES : COMUNIDADES.filter((c) => c.departamento === departamento)
     return [...new Set(base.map((c) => c.municipio))].sort()
-  }, [departamento])
+  }, [departamento, COMUNIDADES])
 
   const resultados = useMemo(() => {
     const q = texto.trim().toLowerCase()
@@ -37,7 +45,7 @@ export default function P2Consulta() {
       if (estado !== TODOS && c.estado !== estado) return false
       return true
     })
-  }, [texto, departamento, municipio, tipo, estado])
+  }, [texto, departamento, municipio, tipo, estado, COMUNIDADES])
 
   const limpiar = () => {
     setTexto('')
