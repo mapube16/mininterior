@@ -11,6 +11,7 @@ export const R = {
   tramiteDatos: '/tramite/datos',           // P7 paso 2
   tramiteComunidad: '/tramite/comunidad',   // P7 paso 3
   tramiteDocumentos: '/tramite/documentos', // P8
+  tramiteEnviar: '/tramite/enviar',         // P8b: revisar y radicar
 
   asesorBandeja: '/bo/asesor',              // P9
   asesorCaso: '/bo/asesor/:radicado',       // P10

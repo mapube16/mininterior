@@ -275,6 +275,7 @@ def radicar_caso(
         comunidad_id=comunidad.id if comunidad else None,
         canal=datos.canal,
         datos=datos.datos,
+        solicitante_id=usuario.id if usuario else None,
     )
     db.add(caso)
     db.flush()
@@ -330,6 +331,20 @@ def _caso_out(caso: Caso) -> dict:
         "fundamento": caso.fundamento,
         "datos": caso.datos or {},
     }
+
+
+@app.get("/api/mis-solicitudes", response_model=list[CasoOut], tags=["casos"])
+def mis_solicitudes(
+    db: Session = Depends(sesion),
+    usuario: Usuario = Depends(usuario_actual),
+) -> list[dict]:
+    """Las solicitudes del ciudadano conectado, de la más reciente a la más antigua."""
+    casos = db.execute(
+        select(Caso)
+        .where(Caso.solicitante_id == usuario.id)
+        .order_by(Caso.created_at.desc())
+    ).scalars().all()
+    return [_caso_out(c) for c in casos]
 
 
 @app.get("/api/casos/{caso_id}", response_model=CasoOut, tags=["casos"])

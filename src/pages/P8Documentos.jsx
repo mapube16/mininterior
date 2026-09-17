@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Button, ProgressSteps } from '../ds/index.js'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout.jsx'
 import { PASOS_TRAMITE, PieTramite } from './P7Datos.jsx'
+import { R } from '../routes.js'
 
 // Requisitos del trámite de cambio de representante legal (los del prototipo).
 const DOCS = [
@@ -18,6 +20,7 @@ function tamano(bytes) {
 }
 
 export default function P8Documentos() {
+  const navegar = useNavigate()
   // Guarda el File real elegido por documento; nada se sube en la maqueta.
   const [archivos, setArchivos] = useState({})
   const listos = DOCS.filter((d) => archivos[d.id]).length
@@ -134,8 +137,9 @@ export default function P8Documentos() {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, lineHeight: '22px', color: 'var(--text-body)', margin: 0 }}>
           {listos} de {DOCS.length} documentos listos
         </p>
-        {/* TODO(backend): el paso 5 (revisar y enviar) no existe todavía. */}
-        <Button disabled={listos < DOCS.length}>Continuar al paso 5</Button>
+        <Button disabled={listos < DOCS.length} onClick={() => navegar(R.tramiteEnviar)}>
+          Continuar al paso 5
+        </Button>
       </div>
 
       <PieTramite />

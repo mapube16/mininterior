@@ -1,5 +1,6 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { TopBar, Header, Footer } from '../ds/index.js'
+import { NOMBRE_ROL, useSesion } from '../api/sesion.jsx'
 import { R } from '../routes.js'
 
 const ACCENT = '#D23C46' // Ministerio del Interior
@@ -44,6 +45,43 @@ const FOOTER_LINKS = [
   'Mapa del sitio',
 ]
 
+/**
+ * Franja con quién está conectado y su rol.
+ *
+ * En el handoff cada pantalla de back office repetía este bloque inline. Vive aquí
+ * para que salga igual en todas y para que se vea de inmediato con qué rol estás
+ * mirando el sistema, que es lo primero que se pregunta quien lo ve funcionando.
+ */
+function BandaSesion() {
+  const { usuario, salir } = useSesion()
+  const navegar = useNavigate()
+  if (!usuario) return null
+
+  const roles = (usuario.roles ?? []).map((r) => NOMBRE_ROL[r] ?? r).join(' · ')
+  return (
+    <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-subtle)' }}>
+      <div style={{
+        maxWidth: 1320, margin: '0 auto', padding: '8px 24px', display: 'flex',
+        alignItems: 'center', gap: 16, flexWrap: 'wrap',
+        fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--text-body)',
+      }}>
+        <span>Sesión de <strong>{usuario.nombre}</strong>{roles && ` · ${roles}`}</span>
+        <button
+          type="button"
+          onClick={() => { salir(); navegar(R.inicio) }}
+          style={{
+            marginLeft: 'auto', minHeight: 36, padding: '0 12px', borderRadius: 6,
+            border: '1px solid var(--border-subtle)', background: 'var(--surface-card)',
+            fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--text-link)', cursor: 'pointer',
+          }}
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  )
+}
+
 /** Franja tricolor de 4px bajo el header, en todas las pantallas. */
 function Tricolor() {
   return (
@@ -78,6 +116,7 @@ export default function Layout({ children, backoffice = false, ancho = 1160, pad
         items={items}
       />
       <Tricolor />
+      <BandaSesion />
       <main
         id="contenido-principal"
         style={{ flex: 1, width: '100%', maxWidth: ancho, margin: '0 auto', padding, boxSizing: 'border-box' }}

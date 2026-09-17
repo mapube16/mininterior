@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Button, Select, TextField } from '../ds/index.js'
 import Layout, { Migas } from '../components/Layout.jsx'
-import { Parrafo, Mudo, Vacio } from '../components/ui.jsx'
+import { Aviso, Parrafo, Mudo, Vacio } from '../components/ui.jsx'
+import { api } from '../api/cliente.js'
+import { useDatos } from '../api/useDatos.js'
 import { buscarCaso } from '../mock/datos.js'
 import { R } from '../routes.js'
 
@@ -20,21 +22,20 @@ const CATEGORIAS = [
   'Registro de nueva comunidad',
 ]
 
-const DATOS_SOLICITUD = [
-  { k: 'Nuevo número de familias', v: '134 (antes 128)' },
-  { k: 'Correo de contacto actualizado', v: 'guapiabajounidos@correo.com' },
-]
-
 const CAJA = { border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)', padding: 16 }
 
 export default function P17ClasifCaso() {
   const { radicado } = useParams()
-  const caso = buscarCaso(radicado)
-  const [confirmada, setConfirmada] = useState(null)
+  const navegar = useNavigate()
+  const { datos: caso, cargando } = useDatos((api) => api.caso(radicado), buscarCaso(radicado), [radicado])
+
   const [categoriaCorregida, setCategoriaCorregida] = useState(null)
   const [motivo, setMotivo] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [confirmada, setConfirmada] = useState(null)
+  const [error, setError] = useState(null)
 
-  if (!caso) {
+  if (!caso && !cargando) {
     return (
       <Layout backoffice>
         <Vacio titulo="No encontramos ese caso">
@@ -44,97 +45,105 @@ export default function P17ClasifCaso() {
       </Layout>
     )
   }
+  if (!caso) return <Layout backoffice><Mudo>Cargando el caso…</Mudo></Layout>
 
+  const datosSolicitud = Object.entries(caso.datos ?? {}).map(([k, v]) => ({ k, v: String(v) }))
   const datos = [
     { k: 'Comunidad', v: caso.comunidad },
     { k: 'Fecha de radicación', v: caso.radicadoEl },
-    ...DATOS_SOLICITUD,
+    ...datosSolicitud,
   ]
 
-  // TODO(backend): confirmar la categoría mueve el caso a la mesa de asignación.
-  const confirmar = (titulo) => setConfirmada(titulo)
-
-  const corregirCategoria = (v) => {
-    setCategoriaCorregida(v)
-    setConfirmada(null)
+  // Clasificar mueve el caso a la mesa de asignación (o lo traslada si no es competencia).
+  const clasificar = async (categoria, corregida) => {
+    setEnviando(true)
+    setError(null)
+    try {
+      await api.clasificar(caso.numero, { categoria, tipologia: categoria, corregida, motivo: motivo || null })
+      setConfirmada(categoria)
+      // Ya no está en esta bandeja: se vuelve a ella pasado un momento de confirmación.
+      setTimeout(() => navegar(R.clasificacionBandeja), 1200)
+    } catch (e) {
+      setError(e.mensaje ?? e.message)
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
-    <Layout backoffice padding="0">
-      <Sesion>Sesión de <strong>Sandra Molano</strong> · Clasificadora · Dirección de Asuntos NARP</Sesion>
-      <div style={{ padding: '24px 24px 64px' }}>
-        <Migas items={[{ label: 'Bandeja de clasificación', href: R.clasificacionBandeja }, { label: caso.numero }]} />
+    <Layout backoffice padding="24px 24px 64px">
+      <Migas items={[{ label: 'Bandeja de clasificación', href: R.clasificacionBandeja }, { label: caso.numero }]} />
 
-        <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 34, lineHeight: '42px', color: 'var(--text-title)', margin: '12px 0 0' }}>
-          Pantalla de clasificación
-        </h1>
-        <Parrafo style={{ margin: '8px 0 24px', maxWidth: '70ch' }}>
-          {caso.numero} · {caso.comunidad} · {caso.lugar}
-        </Parrafo>
+      <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 34, lineHeight: '42px', color: 'var(--text-title)', margin: '12px 0 0' }}>
+        Pantalla de clasificación
+      </h1>
+      <Parrafo style={{ margin: '8px 0 24px', maxWidth: '70ch' }}>
+        {caso.numero} · {caso.comunidad} · {caso.lugar}
+      </Parrafo>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
-          <section style={{ border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)', padding: 20, minWidth: 0 }}>
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: '0 0 12px' }}>
-              Datos de la solicitud
-            </h2>
-            <dl style={{ margin: 0 }}>
-              {datos.map((d) => (
-                <div key={d.k} style={{ padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <dt style={{ fontFamily: 'var(--font-body)', fontSize: 12, lineHeight: '20px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{d.k}</dt>
-                  <dd style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: '24px', color: 'var(--text-title)', margin: '4px 0 0' }}>{d.v}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
-            <Mudo>El sistema no logra distinguir entre estas dos categorías. Ninguna viene preseleccionada.</Mudo>
-
-            {OPCIONES.map((o) => (
-              <section key={o.id} style={CAJA}>
-                <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18, lineHeight: '26px', color: 'var(--text-title)', margin: 0 }}>{o.titulo}</h3>
-                <Parrafo style={{ fontSize: 14, lineHeight: '22px', margin: '8px 0 0' }}>Señales: {o.senales}</Parrafo>
-                <div style={{ marginTop: 12 }}>
-                  <Button variant="outline" onClick={() => confirmar(o.titulo)}>Confirmar esta categoría</Button>
-                </div>
-              </section>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
+        <section style={{ border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)', padding: 20, minWidth: 0 }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: '0 0 12px' }}>
+            Datos de la solicitud
+          </h2>
+          <dl style={{ margin: 0 }}>
+            {datos.map((d) => (
+              <div key={d.k} style={{ padding: '10px 0', borderBottom: '1px solid var(--border-subtle)' }}>
+                <dt style={{ fontFamily: 'var(--font-body)', fontSize: 12, lineHeight: '20px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>{d.k}</dt>
+                <dd style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: '24px', color: 'var(--text-title)', margin: '4px 0 0' }}>{d.v}</dd>
+              </div>
             ))}
+          </dl>
+        </section>
 
-            <section style={CAJA}>
-              <Select
-                label="O corrige a otra categoría"
-                placeholder="Elige una categoría"
-                options={CATEGORIAS}
-                value={categoriaCorregida}
-                onChange={corregirCategoria}
-              />
-              <div style={{ marginTop: 10 }}>
-                <TextField label="Motivo de la corrección" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+          <Mudo>El sistema no logra distinguir entre estas dos categorías. Ninguna viene preseleccionada.</Mudo>
+
+          {OPCIONES.map((o) => (
+            <section key={o.id} style={CAJA}>
+              <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18, lineHeight: '26px', color: 'var(--text-title)', margin: 0 }}>{o.titulo}</h3>
+              <Parrafo style={{ fontSize: 14, lineHeight: '22px', margin: '8px 0 0' }}>Señales: {o.senales}</Parrafo>
+              <div style={{ marginTop: 12 }}>
+                <Button variant="outline" disabled={enviando || confirmada != null} onClick={() => clasificar(o.titulo, false)}>
+                  Confirmar esta categoría
+                </Button>
               </div>
             </section>
+          ))}
 
-            {confirmada && (
-              <div style={{ border: '1px solid #158361', borderLeft: '4px solid #158361', borderRadius: 8, background: '#E6F3EE', padding: '14px 16px' }}>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, lineHeight: '22px', color: 'var(--text-title)', margin: 0 }}>
-                  Clasificado como <strong>{confirmada}</strong>. El caso pasa a la mesa de asignación.
-                </p>
-              </div>
-            )}
+          <section style={CAJA}>
+            <Select
+              label="O corrige a otra categoría"
+              placeholder="Elige una categoría"
+              options={CATEGORIAS}
+              value={categoriaCorregida}
+              onChange={setCategoriaCorregida}
+            />
+            <div style={{ marginTop: 10 }}>
+              <TextField label="Motivo de la corrección" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <Button
+                variant="outline"
+                disabled={!categoriaCorregida || enviando || confirmada != null}
+                onClick={() => clasificar(categoriaCorregida, true)}
+              >
+                Clasificar con la categoría corregida
+              </Button>
+            </div>
+          </section>
 
-            <Link to={R.clasificacionBandeja} style={{ fontFamily: 'var(--font-body)', fontSize: 14 }}>Devolver a triage</Link>
-          </div>
+          {error && <Aviso tono="error" titulo="No pudimos clasificar el caso">{error}</Aviso>}
+
+          {confirmada && (
+            <Aviso tono="exito" titulo="Clasificado">
+              Clasificado como <strong>{confirmada}</strong>. El caso pasa a la mesa de asignación.
+            </Aviso>
+          )}
+
+          <Link to={R.clasificacionBandeja} style={{ fontFamily: 'var(--font-body)', fontSize: 14 }}>Volver a la bandeja</Link>
         </div>
       </div>
     </Layout>
-  )
-}
-
-function Sesion({ children }) {
-  return (
-    <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-subtle)' }}>
-      <div style={{ padding: '12px 24px', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-body)' }}>
-        {children}
-      </div>
-    </div>
   )
 }

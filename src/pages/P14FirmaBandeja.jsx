@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { Checkbox } from '../ds/index.js'
 import Layout from '../components/Layout.jsx'
-import { BotonLink } from '../components/ui.jsx'
+import { Aviso, BotonLink, Vacio } from '../components/ui.jsx'
+import { useDatos } from '../api/useDatos.js'
 import { buscarCaso } from '../mock/datos.js'
 import { R, ruta } from '../routes.js'
 
@@ -13,77 +12,68 @@ const RIO_NAYA = {
   lugar: 'Buenaventura, Valle del Cauca',
 }
 
-const APROBACIONES = {
-  'RUPN-2026-004871': { aprobador: 'Elena Vargas', fecha: '27 de agosto de 2026' },
-  'RUPN-2026-004320': { aprobador: 'Elena Vargas', fecha: '26 de agosto de 2026' },
-}
-
-const PARA_FIRMA = [buscarCaso('RUPN-2026-004871'), RIO_NAYA]
+const RESPALDO = [buscarCaso('RUPN-2026-004871'), RIO_NAYA]
 
 export default function P14FirmaBandeja() {
-  const [seleccion, setSeleccion] = useState(() => PARA_FIRMA.map((c) => c.numero))
-
-  const alternar = (numero) =>
-    setSeleccion((s) => (s.includes(numero) ? s.filter((n) => n !== numero) : [...s, numero]))
+  // Aprobados y pendientes de radicación: ambos esperan la firma.
+  const { datos: PARA_FIRMA, cargando, error } = useDatos((api) => api.bandeja('firmante'), RESPALDO)
 
   return (
     <Layout backoffice padding="24px 24px 64px">
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-body)', margin: '0 0 20px' }}>
-        Sesión de <strong>Marta Rincón</strong> · Directora de Asuntos NARP · Firmante
+      <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 34, lineHeight: '42px', color: 'var(--text-title)', margin: 0 }}>
+        Bandeja de firma
+      </h1>
+      <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: '24px', color: 'var(--text-body)', margin: '8px 0 0', maxWidth: '70ch' }}>
+        Actos aprobados por revisión, pendientes de tu firma electrónica. Cada acto se confirma y se firma uno a uno.
       </p>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 34, lineHeight: '42px', color: 'var(--text-title)', margin: 0 }}>
-            Bandeja de firma
-          </h1>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: '24px', color: 'var(--text-body)', margin: '8px 0 0', maxWidth: '70ch' }}>
-            Actos aprobados por revisión, pendientes de tu firma electrónica.
-          </p>
+      {error && (
+        <div style={{ marginTop: 16 }}>
+          <Aviso tono="aviso" titulo="Mostrando datos de ejemplo">{error.mensaje ?? error.message}</Aviso>
         </div>
-        {/* La firma por lote se confirma documento por documento en la pantalla de firma. */}
-        <BotonLink
-          variant="outline"
-          disabled={seleccion.length === 0}
-          to={ruta(R.firmaCaso, { radicado: seleccion[0] ?? PARA_FIRMA[0].numero })}
-        >
-          Firmar seleccionados ({seleccion.length})
-        </BotonLink>
-      </div>
+      )}
 
-      <section style={{ marginTop: 24, border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)' }}>
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-          {PARA_FIRMA.map((c, i) => (
-            <li
-              key={c.numero}
-              style={{
-                display: 'flex', gap: 16, alignItems: 'center', padding: '18px 20px',
-                ...(i < PARA_FIRMA.length - 1 ? { borderBottom: '1px solid var(--border-subtle)' } : null),
-              }}
-            >
-              <span style={{ flex: 'none' }}>
-                <Checkbox
-                  label={`Seleccionar ${c.numero}`}
-                  checked={seleccion.includes(c.numero)}
-                  onChange={() => alternar(c.numero)}
-                />
-              </span>
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '20px', color: 'var(--text-muted)' }}>
-                  {c.numero} · aprobado por {APROBACIONES[c.numero].aprobador} el {APROBACIONES[c.numero].fecha}
-                </span>
-                <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18, lineHeight: '26px', color: 'var(--text-title)', marginTop: 2 }}>
-                  {c.tipo}
-                </span>
-                <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 4 }}>
-                  {c.comunidad} · {c.lugar}
-                </span>
-              </div>
-              <BotonLink variant="outline" to={ruta(R.firmaCaso, { radicado: c.numero })}>Firmar</BotonLink>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {!cargando && PARA_FIRMA.length === 0 ? (
+        <div style={{ marginTop: 24 }}>
+          <Vacio titulo="No hay actos por firmar">
+            Cuando revisión apruebe una proyección, aparecerá aquí.
+          </Vacio>
+        </div>
+      ) : (
+        <section style={{ marginTop: 24, border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)' }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {PARA_FIRMA.map((c, i) => (
+              <li
+                key={c.numero}
+                style={{
+                  display: 'flex', gap: 16, alignItems: 'center', padding: '18px 20px',
+                  ...(i < PARA_FIRMA.length - 1 ? { borderBottom: '1px solid var(--border-subtle)' } : null),
+                }}
+              >
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '20px', color: 'var(--text-muted)' }}>
+                    {c.numero}
+                    {c.diasRestantes != null && ` · ${c.vencido ? `vencido hace ${Math.abs(c.diasRestantes)} días hábiles` : `quedan ${c.diasRestantes} días hábiles`}`}
+                  </span>
+                  <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18, lineHeight: '26px', color: 'var(--text-title)', marginTop: 2 }}>
+                    {c.tipo}
+                  </span>
+                  <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 4 }}>
+                    {c.comunidad} · {c.lugar}
+                  </span>
+                </div>
+                {c.estadoInterno === 'PENDIENTE_RADICACION' && (
+                  <span style={{ flex: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, background: '#FFFAE8', color: '#9D7700', border: '1px solid #9D7700', borderRadius: 20, padding: '4px 12px', fontFamily: 'var(--font-body)', fontSize: 13, lineHeight: '20px', whiteSpace: 'nowrap' }}>
+                    <span aria-hidden="true" style={{ fontWeight: 700 }}>!</span>
+                    Pendiente de radicación
+                  </span>
+                )}
+                <BotonLink variant="outline" to={ruta(R.firmaCaso, { radicado: c.numero })}>Firmar</BotonLink>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </Layout>
   )
 }

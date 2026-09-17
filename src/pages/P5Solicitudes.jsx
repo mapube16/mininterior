@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../ds/index.js'
 import Layout, { Migas } from '../components/Layout.jsx'
-import { BotonLink } from '../components/ui.jsx'
-import { SOLICITUDES, ESTADOS } from '../mock/datos.js'
+import { BotonLink, Vacio } from '../components/ui.jsx'
+import { SOLICITUDES as RESPALDO, ESTADOS } from '../mock/datos.js'
+import { useDatos } from '../api/useDatos.js'
+import { useSesion } from '../api/sesion.jsx'
 import { R, ruta } from '../routes.js'
 
-// La cuenta de la maqueta: comunidad vinculada y canales de aviso.
+// Canales de aviso de la maqueta; el backend todavía no los guarda por cuenta.
 const CUENTA = {
   comunidad: 'Consejo Comunitario Guapi Abajo Unidos · Guapi, Cauca',
   correo: 'rosalba.m@correo.com',
@@ -13,6 +15,13 @@ const CUENTA = {
 }
 
 export default function P5Solicitudes() {
+  const { usuario } = useSesion()
+  // Solo las solicitudes de quien está conectado.
+  const { datos: SOLICITUDES, cargando } = useDatos(
+    (api) => api.misSolicitudes(),
+    RESPALDO,
+    [usuario?.nombre]
+  )
   const urgente = SOLICITUDES.find((s) => s.estado === 'Requiere tu acción')
 
   return (
@@ -25,7 +34,7 @@ export default function P5Solicitudes() {
             Mis solicitudes
           </h1>
           <p style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 20, lineHeight: '28px', color: 'var(--text-body)', margin: '6px 0 0' }}>
-            {CUENTA.comunidad}
+            {SOLICITUDES[0]?.comunidad ?? CUENTA.comunidad}
           </p>
         </div>
         <BotonLink to={R.tramiteTipo} variant="filled">Nueva solicitud</BotonLink>
@@ -68,9 +77,16 @@ export default function P5Solicitudes() {
               Todas las solicitudes
             </h2>
             <span style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)' }}>
-              {SOLICITUDES.length} solicitudes
+              {SOLICITUDES.length} {SOLICITUDES.length === 1 ? 'solicitud' : 'solicitudes'}
             </span>
           </div>
+          {!cargando && SOLICITUDES.length === 0 ? (
+            <div style={{ padding: 32 }}>
+              <Vacio titulo="Todavía no has radicado ninguna solicitud">
+                Cuando hagas un trámite aparecerá aquí, con su número y en qué va.
+              </Vacio>
+            </div>
+          ) : (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {SOLICITUDES.map((s, i) => {
               const e = ESTADOS[s.estado] ?? ESTADOS['Pendiente']
@@ -115,6 +131,7 @@ export default function P5Solicitudes() {
               )
             })}
           </ul>
+          )}
         </section>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>

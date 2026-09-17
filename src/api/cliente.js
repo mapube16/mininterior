@@ -162,6 +162,7 @@ export const api = {
   validar: (solicitud) => pedir('/api/casos/validar', { metodo: 'POST', cuerpo: solicitud }),
   radicar: (solicitud) => pedir('/api/casos', { metodo: 'POST', cuerpo: solicitud }).then(aCaso),
   caso: (id) => pedir(`/api/casos/${id}`).then(aCaso),
+  misSolicitudes: () => pedir('/api/mis-solicitudes').then((cs) => cs.map(aCaso)),
   eventos: (id) => pedir(`/api/casos/${id}/eventos`),
   expediente: (id) => pedir(`/api/casos/${id}/expediente`),
 

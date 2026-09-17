@@ -1,8 +1,20 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button, TextField } from '../ds/index.js'
 import Layout from '../components/Layout.jsx'
-import { BotonLink } from '../components/ui.jsx'
+import { Aviso, BotonLink } from '../components/ui.jsx'
+import { INICIO_POR_ROL, useSesion } from '../api/sesion.jsx'
 import { R } from '../routes.js'
+
+// Cuentas sembradas para la demostración: una por rol, todas con la misma clave.
+const CUENTAS_DEMO = [
+  ['rosalba.mosquera@correo.com', 'Ciudadana'],
+  ['sandra.molano@mininterior.gov.co', 'Clasificadora'],
+  ['marta.rincon@mininterior.gov.co', 'Mesa y coordinación'],
+  ['daniel.perea@mininterior.gov.co', 'Asesor'],
+  ['elena.vargas@mininterior.gov.co', 'Revisora y firmante'],
+]
+const CLAVE_DEMO = 'demo1234'
 
 const PASOS_CUENTA = [
   {
@@ -27,10 +39,36 @@ const TAB_ON = { ...TAB_BASE, color: 'var(--color-cobalt)', boxShadow: 'inset 0 
 const TAB_OFF = { ...TAB_BASE, color: 'var(--text-body)' }
 
 export default function P4Ingreso() {
+  const navegar = useNavigate()
+  const { entrar } = useSesion()
   const [vista, setVista] = useState('entrar')
   const [correo, setCorreo] = useState('')
   const [clave, setClave] = useState('')
+  const [error, setError] = useState(null)
+  const [entrando, setEntrando] = useState(false)
   const esEntrar = vista === 'entrar'
+
+  const enviar = async (e) => {
+    e?.preventDefault()
+    setError(null)
+    setEntrando(true)
+    try {
+      const u = await entrar(correo.trim(), clave)
+      // Cada rol entra directo a donde trabaja.
+      const rol = (u.roles ?? [])[0]
+      navegar(INICIO_POR_ROL[rol] ?? R.solicitudes)
+    } catch (err) {
+      setError(err.mensaje ?? 'No pudimos entrar. Revisa el correo y la contraseña.')
+    } finally {
+      setEntrando(false)
+    }
+  }
+
+  const usarCuenta = (c) => {
+    setCorreo(c)
+    setClave(CLAVE_DEMO)
+    setError(null)
+  }
 
   return (
     <Layout ancho={760} padding="40px 24px 64px">
@@ -53,8 +91,8 @@ export default function P4Ingreso() {
         </div>
 
         {esEntrar ? (
-          <div style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {/* TODO(backend): autenticar contra el proveedor de identidad del Estado. */}
+          <form style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 18 }} onSubmit={enviar}>
+            {error && <Aviso tono="error" titulo="No pudimos entrar">{error}</Aviso>}
             <TextField
               label="Tu correo electrónico"
               placeholder="nombre@correo.com"
@@ -71,10 +109,37 @@ export default function P4Ingreso() {
               onChange={(e) => setClave(e.target.value)}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-              <BotonLink to={R.solicitudes} variant="text">Ver el estado de mi solicitud</BotonLink>
-              <BotonLink to={R.tramiteTipo}>Entrar</BotonLink>
+              <BotonLink to={R.consulta} variant="text">Consultar sin cuenta</BotonLink>
+              <Button type="submit" disabled={entrando || !correo || !clave}>
+                {entrando ? 'Entrando...' : 'Entrar'}
+              </Button>
             </div>
-          </div>
+
+            {/* Atajo de la demostración: evita teclear correos largos al mostrar el sistema. */}
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 18, marginTop: 4 }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, lineHeight: '20px', color: 'var(--text-muted)', margin: '0 0 10px' }}>
+                Cuentas de demostración (clave <strong>{CLAVE_DEMO}</strong>):
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {CUENTAS_DEMO.map(([c, etiqueta]) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => usarCuenta(c)}
+                    style={{
+                      minHeight: 36, padding: '0 12px', borderRadius: 6, cursor: 'pointer',
+                      border: `1px solid ${correo === c ? 'var(--color-cobalt)' : 'var(--border-subtle)'}`,
+                      background: correo === c ? 'var(--surface-info)' : 'var(--surface-card)',
+                      fontFamily: 'var(--font-body)', fontSize: 13,
+                      color: correo === c ? 'var(--color-cobalt)' : 'var(--text-body)',
+                    }}
+                  >
+                    {etiqueta}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </form>
         ) : (
           <div style={{ padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <p style={{ fontFamily: 'var(--font-heading)', fontWeight: 600, fontSize: 20, lineHeight: '28px', color: 'var(--text-title)', margin: 0 }}>

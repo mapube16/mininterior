@@ -4,7 +4,16 @@ import { Button, ProgressSteps } from '../ds/index.js'
 import Layout, { Migas } from '../components/Layout.jsx'
 import { Vacio, BotonLink } from '../components/ui.jsx'
 import { buscarSolicitud } from '../mock/datos.js'
+import { useDatos } from '../api/useDatos.js'
 import { R } from '../routes.js'
+
+// Estado interno del caso -> etapa que ve el ciudadano. El ciudadano no ve las
+// etapas internas del back office, solo en qué punto del camino va lo suyo.
+const ETAPA_CIUDADANO = {
+  REQUERIMIENTO_CIUDADANO: 'accion',
+  FIRMADO: 'aprobada', NOTIFICADO: 'aprobada',
+  CERRADO: 'aprobada', CERRADO_FAVORABLE: 'aprobada',
+}
 
 const ETAPAS = ['Radicada', 'Revisión de documentos', 'Verificación en territorio', 'Decisión', 'Resolución firmada']
 
@@ -66,9 +75,19 @@ const chip = (color, fondo) => ({
 
 export default function P6Solicitud() {
   const { radicado } = useParams()
-  const solicitud = buscarSolicitud(radicado)
-  const inicial = VARIANTES[solicitud?.etapa] ? solicitud.etapa : 'revision'
+  const { datos: solicitud, desdeApi } = useDatos(
+    (a) => a.caso(radicado),
+    buscarSolicitud(radicado),
+    [radicado]
+  )
+  // La traza real del caso: cada paso que dio, con su fecha y quién lo movió.
+  const { datos: eventos } = useDatos((a) => a.eventos(radicado), [], [radicado])
+
+  const etapaReal = ETAPA_CIUDADANO[solicitud?.estadoInterno] ?? 'revision'
+  const inicial = VARIANTES[solicitud?.etapa] ? solicitud.etapa : etapaReal
   const [clave, setClave] = useState(inicial)
+  // Con datos reales manda el estado del caso; el conmutador es solo para la maqueta.
+  const claveActiva = desdeApi ? etapaReal : clave
 
   if (!solicitud) {
     return (
@@ -80,34 +99,42 @@ export default function P6Solicitud() {
     )
   }
 
-  const v = VARIANTES[clave]
-  const historial = [...HISTORIAL_BASE, ...HISTORIAL_EXTRA[clave]]
+  const v = VARIANTES[claveActiva]
+  // Con datos reales, el historial sale de la traza del backend.
+  const historial = desdeApi && eventos.length
+    ? eventos.map((e) => ({
+        titulo: e.motivo ?? e.estado_destino ?? 'Movimiento',
+        fecha: new Date(e.timestamp).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }),
+        detalle: e.actor_nombre ? `Registrado por ${e.actor_nombre}.` : '',
+      }))
+    : [...HISTORIAL_BASE, ...HISTORIAL_EXTRA[claveActiva]]
 
   const documentos = [
-    { nombre: 'Acta de la asamblea del 2 de agosto de 2026', meta: 'Foto tomada con celular · 2,1 MB', estado: clave === 'accion' ? 'Debes corregirla' : 'Recibido', ok: clave !== 'accion' },
+    { nombre: 'Acta de la asamblea del 2 de agosto de 2026', meta: 'Foto tomada con celular · 2,1 MB', estado: claveActiva === 'accion' ? 'Debes corregirla' : 'Recibido', ok: claveActiva !== 'accion' },
     { nombre: 'Documento de identidad del nuevo representante', meta: 'PDF · 480 KB', estado: 'Recibido', ok: true },
     { nombre: 'Listado de asistentes a la asamblea', meta: 'PDF · 1,3 MB', estado: 'Recibido', ok: true },
   ]
 
   const datos = [
     { k: 'Número de la solicitud', v: solicitud.numero },
-    { k: 'Tipo de trámite', v: solicitud.tipo },
-    { k: 'Comunidad', v: COMUNIDAD },
-    { k: 'Fecha de radicación', v: '12 de agosto de 2026' },
+    { k: 'Tipo de trámite', v: solicitud.tipoCiudadano ?? solicitud.tipo },
+    { k: 'Comunidad', v: solicitud.comunidad ?? COMUNIDAD },
+    { k: 'Fecha de radicación', v: solicitud.radicadoEl ? new Date(solicitud.radicadoEl).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' }) : '12 de agosto de 2026' },
     { k: 'Dependencia a cargo', v: 'Dirección de Asuntos NARP' },
   ]
 
   return (
     <Layout ancho={1160} padding="0">
-      {/* Conmutador de maqueta: franja a ancho completo, como en el prototipo (antes del <main>). */}
-      <div style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-subtle)', margin: '0 -24px' }}>
+      {/* Conmutador de maqueta: solo cuando NO hay datos reales; con un caso de verdad
+          el estado lo manda el backend y un conmutador confundiría. */}
+      <div hidden={desdeApi} style={{ borderBottom: '1px solid var(--border-subtle)', background: 'var(--surface-subtle)', margin: '0 -24px' }}>
         <div style={{ padding: '10px 24px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
           <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, lineHeight: '20px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>
             Maqueta · ver la solicitud en cada estado
           </span>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {Object.entries(VARIANTES).map(([k, val]) => {
-              const activo = k === clave
+              const activo = k === claveActiva
               return (
                 <button
                   key={k}

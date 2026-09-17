@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Button, TextField } from '../ds/index.js'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import Layout, { Migas } from '../components/Layout.jsx'
-import { Aviso, BotonLink, Vacio } from '../components/ui.jsx'
+import { Aviso, BotonLink, Mudo, Vacio } from '../components/ui.jsx'
+import { api } from '../api/cliente.js'
+import { useDatos } from '../api/useDatos.js'
 import { buscarCaso } from '../mock/datos.js'
 import { R } from '../routes.js'
 
@@ -16,12 +18,16 @@ const RIO_NAYA = {
   asesor: 'Daniel Perea',
 }
 
+// ponytail: el backend no expone un GET de la proyección; el texto se muestra desde la
+// plantilla del handoff hasta que exista ese endpoint.
 const proyeccion = (caso) =>
-  `RESOLUCIÓN N.° 4187\n\n` +
-  `Por la cual se decide sobre la solicitud ${caso.numero} de ${caso.tipo.toLowerCase()} del ${caso.comunidad}, ${caso.lugar}.\n\n` +
+  `RESOLUCIÓN\n\n` +
+  `Por la cual se decide sobre la solicitud ${caso.numero} de ${(caso.tipo ?? '').toLowerCase()} del ${caso.comunidad}, ${caso.lugar}.\n\n` +
   `CONSIDERANDO: que la comunidad fue constituida mediante la Resolución 0512 del 4 de mayo de 2003.\n\n` +
-  `CONSIDERANDO: que la comunidad radicó la solicitud el 12 de agosto de 2026 junto con el acta de asamblea, el documento de identidad del nuevo representante y el listado de asistentes.\n\n` +
-  `RESUELVE: registrar a Arnulfo Hurtado como representante legal del ${caso.comunidad}.`
+  `CONSIDERANDO: que la comunidad radicó la solicitud junto con el acta de asamblea, el documento de identidad del nuevo representante y el listado de asistentes.\n\n` +
+  `Sentido de la decisión: ${caso.sentido ?? 'pendiente de registro por el asesor'}.\n\n` +
+  (caso.fundamento ? `FUNDAMENTO: ${caso.fundamento}\n\n` : '') +
+  `RESUELVE: inscribir en el registro la novedad solicitada.`
 
 // Verificaciones superadas, no un veredicto: la pre-revisión nunca dice "aprobado" ni da un porcentaje.
 const VERIFICACIONES = [
@@ -33,13 +39,17 @@ const VERIFICACIONES = [
 
 export default function P13RevisionCaso() {
   const { radicado } = useParams()
-  const caso = buscarCaso(radicado) ?? (radicado === RIO_NAYA.numero ? RIO_NAYA : null)
+  const navegar = useNavigate()
+  const respaldo = buscarCaso(radicado) ?? (radicado === RIO_NAYA.numero ? RIO_NAYA : null)
+  const { datos: caso, cargando } = useDatos((a) => a.caso(radicado), respaldo, [radicado])
+  const { datos: hallazgos } = useDatos((a) => a.hallazgos(radicado), [], [radicado])
 
-  const [mostrarCambio, setMostrarCambio] = useState(false)
-  const [motivoCambio, setMotivoCambio] = useState('')
-  const [resultado, setResultado] = useState(null) // null | 'aprobado' | 'devuelto'
+  const [motivo, setMotivo] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [resultado, setResultado] = useState(null) // null | 'aprobar' | 'devolver'
+  const [error, setError] = useState(null)
 
-  if (!caso) {
+  if (!caso && !cargando) {
     return (
       <Layout backoffice padding="24px 24px 64px">
         <Vacio titulo="No encontramos ese caso">
@@ -49,26 +59,29 @@ export default function P13RevisionCaso() {
       </Layout>
     )
   }
+  if (!caso) return <Layout backoffice padding="24px 24px 64px"><Mudo>Cargando el caso…</Mudo></Layout>
 
   // Un solo retorno interno por caso: si ya se usó, devolver queda deshabilitado con la nota.
   const retornoAgotado = caso.retornos > 0
+  const motivoValido = motivo.trim().length >= 5
 
-  const aprobar = () => {
-    // TODO(backend): aprobar la proyección y enviarla a la bandeja de firma.
-    setResultado('aprobado')
-  }
-
-  const devolver = () => {
-    // TODO(backend): devolver al asesor con observaciones y consumir el único retorno interno.
-    setResultado('devuelto')
+  const decidir = async (accion) => {
+    setEnviando(true)
+    setError(null)
+    try {
+      await api.revisar(caso.numero, { accion, motivo: motivo.trim() })
+      setResultado(accion)
+      if (accion === 'devolver') setTimeout(() => navegar(R.revisionBandeja), 1500)
+    } catch (e) {
+      // El 409 del segundo retorno se muestra tal cual: es la regla, no un fallo a esconder.
+      setError(e.mensaje ?? e.message)
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
     <Layout backoffice padding="24px 24px 64px">
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-body)', margin: '0 0 20px' }}>
-        Sesión de <strong>Elena Vargas</strong> · Revisora · Dirección de Asuntos NARP
-      </p>
-
       <Migas items={[{ label: 'Bandeja de revisión', href: R.revisionBandeja }, { label: caso.numero }]} />
 
       <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 34, lineHeight: '42px', color: 'var(--text-title)', margin: '12px 0 0' }}>
@@ -78,16 +91,22 @@ export default function P13RevisionCaso() {
         {caso.numero} · {caso.tipo} · {caso.comunidad}
       </p>
 
+      {error && (
+        <div style={{ marginBottom: 20 }}>
+          <Aviso tono="error" titulo="No pudimos registrar la decisión">{error}</Aviso>
+        </div>
+      )}
+
       {resultado && (
         <div style={{ marginBottom: 20 }}>
-          {resultado === 'aprobado' ? (
+          {resultado === 'aprobar' ? (
             <Aviso tono="exito" titulo="Aprobado">
               El acto pasa a la bandeja de firma.{' '}
               <BotonLink variant="outline" size="sm" to={R.firmaBandeja}>Ir a la bandeja de firma</BotonLink>
             </Aviso>
           ) : (
             <Aviso tono="aviso" titulo="Devuelto al asesor">
-              El caso vuelve a {caso.asesor ?? 'el asesor'} con tus observaciones. Este era su único retorno interno.
+              El caso vuelve al asesor con tus observaciones. Este era su único retorno interno.
             </Aviso>
           )}
         </div>
@@ -104,20 +123,29 @@ export default function P13RevisionCaso() {
         </section>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
+          {/* La pre-revisión nunca muestra veredicto ni porcentaje: solo hallazgos y verificaciones. */}
           <section style={{ border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)', padding: 20 }}>
-            {retornoAgotado && (
-              <>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: 0 }}>
-                  Hallazgos corregidos
-                </h2>
-                <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-body)', margin: '8px 0 0' }}>
-                  La proyección no citaba el acto de constitución. {caso.asesor ?? 'El asesor'} corrigió el borrador citando la
-                  Resolución 0512 de 2003 en el segundo considerando.
-                </p>
-              </>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: 0 }}>
+              Hallazgos de la pre-revisión
+            </h2>
+            {hallazgos.length === 0 ? (
+              <Mudo style={{ marginTop: 8 }}>La pre-revisión no dejó hallazgos pendientes.</Mudo>
+            ) : (
+              <ul style={{ listStyle: 'none', margin: '10px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {hallazgos.map((h) => (
+                  <li key={h.id} style={{ border: '1px solid var(--border-subtle)', borderRadius: 6, padding: '10px 12px' }}>
+                    <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-title)' }}>
+                      {h.descripcion}
+                    </span>
+                    <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 13, lineHeight: '20px', color: 'var(--text-muted)', marginTop: 2 }}>
+                      {h.severidad} · {h.estado}{h.ubicacion ? ` · ${h.ubicacion}` : ''}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             )}
 
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: retornoAgotado ? '20px 0 0' : 0 }}>
+            <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: '20px 0 0' }}>
               Verificaciones superadas
             </h2>
             <ul style={{ listStyle: 'none', margin: '10px 0 0', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -134,28 +162,30 @@ export default function P13RevisionCaso() {
             <h2 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 16, lineHeight: '22px', color: 'var(--text-title)', margin: '0 0 14px' }}>
               Decisión
             </h2>
+            <TextField
+              label="Motivo de la decisión"
+              multiline
+              value={motivo}
+              onChange={(e) => setMotivo(e.target.value)}
+            />
+            <Mudo style={{ margin: '6px 0 14px' }}>Mínimo 5 caracteres: queda en la trazabilidad del caso.</Mudo>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <Button disabled={resultado != null} onClick={aprobar}>Aprobar y enviar a firma</Button>
-              <Button variant="outline" disabled={retornoAgotado || resultado != null} onClick={devolver}>
+              <Button disabled={!motivoValido || enviando || resultado != null} onClick={() => decidir('aprobar')}>
+                Aprobar y enviar a firma
+              </Button>
+              <Button
+                variant="outline"
+                disabled={retornoAgotado || !motivoValido || enviando || resultado != null}
+                onClick={() => decidir('devolver')}
+              >
                 Devolver al asesor con observaciones
               </Button>
               {retornoAgotado && (
                 <p style={{ fontFamily: 'var(--font-body)', fontSize: 13, lineHeight: '20px', color: 'var(--text-muted)', margin: 0 }}>
-                  Este caso ya tuvo un retorno interno; no puede devolverse otra vez.
+                  Este caso ya tuvo un retorno interno; solo se permite un retorno, así que no puede devolverse otra vez.
                 </p>
               )}
-              <Button variant="text" onClick={() => setMostrarCambio((v) => !v)}>Cambiar el sentido de la decisión</Button>
             </div>
-            {mostrarCambio && (
-              <div style={{ marginTop: 14, borderTop: '1px solid var(--border-subtle)', paddingTop: 14 }}>
-                <TextField
-                  label="Motivo del cambio de sentido"
-                  multiline
-                  value={motivoCambio}
-                  onChange={(e) => setMotivoCambio(e.target.value)}
-                />
-              </div>
-            )}
           </section>
         </div>
       </div>

@@ -252,6 +252,9 @@ class Caso(Base):
     comunidad_id: Mapped[str | None] = mapped_column(ForeignKey("comunidad.id"), default=None)
     tipo_tramite_id: Mapped[str] = mapped_column(ForeignKey("tipo_tramite.id"))
     canal: Mapped[Canal] = mapped_column(SAEnum(Canal), default=Canal.PORTAL)
+    # Quién radicó: sin esto el ciudadano no puede ver "sus" solicitudes y solo
+    # habría bandejas por rol interno.
+    solicitante_id: Mapped[str | None] = mapped_column(ForeignKey("usuario.id"), default=None)
 
     estado: Mapped[Estado] = mapped_column(SAEnum(Estado), default=Estado.RECIBIDO)
     responsable_actual_id: Mapped[str | None] = mapped_column(ForeignKey("usuario.id"), default=None)

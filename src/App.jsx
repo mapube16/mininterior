@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import { R } from './routes.js'
 import Layout from './components/Layout.jsx'
 import { Vacio } from './components/ui.jsx'
+import { ProveedorSesion } from './api/sesion.jsx'
 import { Spinner } from './ds/index.js'
 
 import P1Inicio from './pages/P1Inicio.jsx'
@@ -15,6 +16,7 @@ const P7Tipo = lazy(() => import('./pages/P7Tipo.jsx'))
 const P7Datos = lazy(() => import('./pages/P7Datos.jsx'))
 const P7Comunidad = lazy(() => import('./pages/P7Comunidad.jsx'))
 const P8Documentos = lazy(() => import('./pages/P8Documentos.jsx'))
+const P8bEnviar = lazy(() => import('./pages/P8bEnviar.jsx'))
 
 const P9AsesorBandeja = lazy(() => import('./pages/P9AsesorBandeja.jsx'))
 const P10AsesorCaso = lazy(() => import('./pages/P10AsesorCaso.jsx'))
@@ -74,6 +76,7 @@ function NoEncontrada() {
 export default function App() {
   return (
     <BrowserRouter>
+      <ProveedorSesion>
       <Suspense fallback={<Cargando />}>
         <Routes>
           {/* Ciudadano */}
@@ -87,6 +90,7 @@ export default function App() {
           <Route path={R.tramiteDatos} element={<P7Datos />} />
           <Route path={R.tramiteComunidad} element={<P7Comunidad />} />
           <Route path={R.tramiteDocumentos} element={<P8Documentos />} />
+          <Route path={R.tramiteEnviar} element={<P8bEnviar />} />
 
           {/* Back office — asesor, revisor, firmante */}
           <Route path={R.asesorBandeja} element={<P9AsesorBandeja />} />
@@ -129,6 +133,7 @@ export default function App() {
           <Route path="*" element={<NoEncontrada />} />
         </Routes>
       </Suspense>
+      </ProveedorSesion>
     </BrowserRouter>
   )
 }
