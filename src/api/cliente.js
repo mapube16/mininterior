@@ -9,7 +9,12 @@
  * src/mock/datos.js, que es lo que permite ver el diseño sin backend arriba.
  */
 
-const BASE = import.meta.env.VITE_API_URL ?? ''
+// Vite inyecta VITE_* en tiempo de BUILD, no en runtime: si la variable no está
+// puesta cuando se construye, el bundle sale sin ella. Por eso el despliegue actual
+// va como valor por defecto y la variable solo hace falta para apuntar a otra API.
+const API_DESPLEGADA = 'https://api-production-0777.up.railway.app'
+
+const BASE = import.meta.env.VITE_API_URL ?? API_DESPLEGADA
 
 export const hayApi = Boolean(BASE)
 

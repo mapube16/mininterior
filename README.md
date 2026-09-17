@@ -36,10 +36,15 @@ src/
 
 ## Estado actual
 
-Frontend con **datos de ejemplo**, sin backend. Los puntos donde haría falta una llamada real
-están marcados con `// TODO(backend):` — buscar ese texto da el inventario de lo que hay que
-cablear. El estado vive en cada pantalla con `useState`; no hay store global, igual que el
-prototipo.
+Portal + API funcionando. El backend vive en [backend/](backend/) (FastAPI + PostgreSQL) y
+tiene su propio README con el detalle del dominio y las reglas.
+
+Las pantallas de consulta pública ya consumen la API. El resto sigue con datos de ejemplo;
+los puntos pendientes de cablear están marcados con `// TODO(backend):`, y `src/api/cliente.js`
+ya expone todos los endpoints que necesitan.
+
+Sin `VITE_API_URL` el portal funciona igual con los datos de ejemplo, que es como se enseña
+el diseño cuando la API no está arriba.
 
 Lo que el port conserva a propósito, porque son decisiones de diseño y no detalles:
 
@@ -55,6 +60,7 @@ Lo que el port conserva a propósito, porque son decisiones de diseño y no deta
 
 ## Despliegue en Railway
 
+Dos servicios y una base: `web` (este portal), `api` (raíz `backend/`) y PostgreSQL.
 `railway.json` ya trae la configuración. El build genera `dist/` y `npm start` lo sirve con
 `sirv --single` (el `--single` es lo que hace que recargar `/consulta` no dé 404, porque el
 enrutamiento es del lado del cliente). Railway inyecta `PORT`.
