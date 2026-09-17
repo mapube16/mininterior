@@ -2,8 +2,10 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button, RadioGroup, TextField } from '../ds/index.js'
 import Layout, { Migas } from '../components/Layout.jsx'
-import { BotonLink, Vacio } from '../components/ui.jsx'
+import { Aviso, BotonLink, Vacio } from '../components/ui.jsx'
 import { buscarCaso } from '../mock/datos.js'
+import { useDatos } from '../api/useDatos.js'
+import { api } from '../api/cliente.js'
 import { R, ruta } from '../routes.js'
 
 const DATOS_SOLICITUD = [
@@ -48,12 +50,14 @@ const CHIP_RECIBIDO = {
 export default function P10AsesorCaso() {
   const { radicado } = useParams()
   const navegar = useNavigate()
-  const caso = buscarCaso(radicado)
+  const { datos: caso } = useDatos((a) => a.caso(radicado), buscarCaso(radicado), [radicado])
 
   const [tab, setTab] = useState('solicitud')
   const [sentido, setSentido] = useState(null)
   const [fundamento, setFundamento] = useState('')
   const [preguntaIdx, setPreguntaIdx] = useState(null)
+  const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState(null)
 
   if (!caso) {
     return (
@@ -70,9 +74,19 @@ export default function P10AsesorCaso() {
   // "El sistema llena, no decide": sin sentido Y fundamento no hay borrador que proyectar.
   const faltaDecision = !sentido || !fundamento
 
-  const registrar = () => {
-    // TODO(backend): guardar el sentido y el fundamento del asesor antes de generar la proyección.
-    navegar(ruta(R.asesorProyeccion, { radicado: caso.numero }))
+  const registrar = async () => {
+    setGuardando(true)
+    setError(null)
+    try {
+      // El backend exige la decisión ANTES de dejar proyectar: si esto no se guarda,
+      // generar el borrador responde 409.
+      await api.registrarDecision(caso.numero, { sentido, fundamento })
+      navegar(ruta(R.asesorProyeccion, { radicado: caso.numero }))
+    } catch (e) {
+      setError(e.mensaje)
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -190,9 +204,14 @@ export default function P10AsesorCaso() {
                 onChange={(e) => setFundamento(e.target.value)}
               />
             </div>
+            {error && (
+              <div style={{ marginTop: 16 }}>
+                <Aviso tono="error" titulo="No pudimos registrar la decisión">{error}</Aviso>
+              </div>
+            )}
             <div style={{ marginTop: 16 }}>
-              <Button disabled={faltaDecision} onClick={registrar}>
-                Registrar decisión y continuar a la proyección
+              <Button disabled={faltaDecision || guardando} onClick={registrar}>
+                {guardando ? 'Registrando...' : 'Registrar decisión y continuar a la proyección'}
               </Button>
             </div>
           </section>

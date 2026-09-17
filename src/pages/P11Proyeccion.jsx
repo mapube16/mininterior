@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button, TextField } from '../ds/index.js'
 import Layout, { Migas } from '../components/Layout.jsx'
 import { Aviso, BotonLink, Vacio } from '../components/ui.jsx'
 import { buscarCaso } from '../mock/datos.js'
+import { useDatos } from '../api/useDatos.js'
+import { api, hayApi } from '../api/cliente.js'
 import { R } from '../routes.js'
 
 const MARCADOR = '[verificar: cita del acto de constitución]'
@@ -20,11 +22,25 @@ const borradorInicial = (caso) =>
 
 export default function P11Proyeccion() {
   const { radicado } = useParams()
-  const caso = buscarCaso(radicado)
+  const { datos: caso } = useDatos((a) => a.caso(radicado), buscarCaso(radicado), [radicado])
 
   const [borrador, setBorrador] = useState(() => (caso ? borradorInicial(caso) : ''))
   const [modo, setModo] = useState(null) // null | 'corregir' | 'justificar'
   const [enviado, setEnviado] = useState(false)
+  const [error, setError] = useState(null)
+  const [trabajando, setTrabajando] = useState(false)
+
+  // El borrador lo redacta el servidor a partir de la decisión del asesor, y deja
+  // marcadores [VERIFICAR: ...] donde falta un dato en vez de inventarlo.
+  useEffect(() => {
+    if (!hayApi || !caso?.numero) return
+    let vigente = true
+    api
+      .proyectar(caso.numero)
+      .then((p) => vigente && p?.contenido && setBorrador(p.contenido))
+      .catch(() => {}) // si falla, queda el borrador local y el asesor puede seguir
+    return () => { vigente = false }
+  }, [caso?.numero])
 
   if (!caso) {
     return (
@@ -44,17 +60,23 @@ export default function P11Proyeccion() {
     setModo('corregir')
   }
 
-  const enviar = () => {
-    // TODO(backend): enviar la proyección a pre-revisión y consumir el retorno interno del caso.
-    setEnviado(true)
+  const enviar = async () => {
+    setTrabajando(true)
+    setError(null)
+    try {
+      // Guarda el texto editado y lo manda a pre-revisión.
+      await api.editarProyeccion(caso.numero, { contenido: borrador, marcadores_pendientes: [] })
+      await api.preRevision(caso.numero)
+      setEnviado(true)
+    } catch (e) {
+      setError(e.mensaje)
+    } finally {
+      setTrabajando(false)
+    }
   }
 
   return (
     <Layout backoffice padding="24px 24px 64px">
-      <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-body)', margin: '0 0 20px' }}>
-        Sesión de <strong>Daniel Perea</strong> · Asesor · Dirección de Asuntos NARP
-      </p>
-
       <Migas items={[{ label: 'Bandeja del asesor', href: R.asesorBandeja }, { label: caso.numero }]} />
 
       <h1 style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 34, lineHeight: '42px', color: 'var(--text-title)', margin: '12px 0 0' }}>
@@ -120,8 +142,13 @@ export default function P11Proyeccion() {
 
           <section style={{ border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)', padding: 20 }}>
             {/* No se puede enviar sin atender los hallazgos: el marcador no puede llegar a la revisora. */}
-            <Button disabled={!resuelto || enviado} onClick={enviar}>
-              {enviado ? 'Enviado a pre-revisión' : 'Enviar a pre-revisión'}
+            {error && (
+              <div style={{ width: '100%', marginBottom: 12 }}>
+                <Aviso tono="error" titulo="No pudimos enviar a pre-revisión">{error}</Aviso>
+              </div>
+            )}
+            <Button disabled={!resuelto || enviado || trabajando} onClick={enviar}>
+              {enviado ? 'Enviado a pre-revisión' : trabajando ? 'Enviando...' : 'Enviar a pre-revisión'}
             </Button>
           </section>
         </div>

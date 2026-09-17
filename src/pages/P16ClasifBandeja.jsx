@@ -4,6 +4,11 @@ import { useDatos } from '../api/useDatos.js'
 import { R, ruta } from '../routes.js'
 
 // Respaldo cuando no hay backend: los casos del handoff, recién radicados.
+const fecha = (v) =>
+  v && !Number.isNaN(Date.parse(v))
+    ? new Date(v).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })
+    : v
+
 const RESPALDO = [
   { numero: 'RUPN-2026-005102', radicadoEl: '9 de septiembre de 2026', comunidad: 'Consejo Comunitario Guapi Abajo Unidos', tipo: 'Actualización del censo, o actualización de datos de contacto' },
   { numero: 'RUPN-2026-005098', radicadoEl: '9 de septiembre de 2026', comunidad: 'Consejo Comunitario del Bajo Baudó', tipo: 'Cambio de representante legal' },
@@ -48,10 +53,10 @@ export default function P16ClasifBandeja() {
               >
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '20px', color: 'var(--text-muted)' }}>
-                    {c.numero} · radicada el {c.radicadoEl}
+                    {c.numero}{c.radicadoEl && ` · radicada el ${fecha(c.radicadoEl)}`}
                   </span>
                   <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18, lineHeight: '26px', color: 'var(--text-title)', marginTop: 2 }}>
-                    {c.comunidad}
+                    {c.comunidad ?? 'Comunidad sin identificar en el registro'}
                   </span>
                   <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 4 }}>
                     Propuesta del sistema: {c.tipo}

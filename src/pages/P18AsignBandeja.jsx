@@ -51,10 +51,7 @@ export default function P18AsignBandeja() {
                     {c.diasRestantes != null && ` · ${c.vencido ? `vencido hace ${Math.abs(c.diasRestantes)} días hábiles` : `quedan ${c.diasRestantes} días hábiles`}`}
                   </span>
                   <span style={{ display: 'block', fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 18, lineHeight: '26px', color: 'var(--text-title)', marginTop: 2 }}>
-                    {c.comunidad}
-                  </span>
-                  <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 4 }}>
-                    {c.lugar}
+                    {c.comunidad ?? 'Comunidad sin identificar en el registro'}
                   </span>
                 </div>
                 {c.vencido && (

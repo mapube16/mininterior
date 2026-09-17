@@ -455,10 +455,22 @@ def bandeja(
     usuario: Usuario = Depends(usuario_actual),
     solo_mios: bool = Query(False),
 ) -> list[dict]:
-    """Bandeja del rol, del más antiguo al más reciente."""
+    """Bandeja del rol, del más antiguo al más reciente.
+
+    Solo la ve quien tiene ese rol. Sin esta comprobación cualquier cuenta con sesión
+    —incluida la de un ciudadano— podía leer las bandejas internas con casos de otras
+    comunidades, que son datos restringidos (§10).
+    """
     estados = _ESTADOS_POR_ROL.get(rol)
     if not estados:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"No hay bandeja para el rol {rol}.")
+
+    # El coordinador supervisa todas las etapas, así que ve cualquier bandeja.
+    if not (usuario.tiene_rol(rol) or usuario.tiene_rol(Rol.COORDINADOR)):
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            f"Tu cuenta no tiene el rol {rol.value}, así que no puede ver esa bandeja.",
+        )
 
     consulta = select(Caso).where(Caso.estado.in_(estados))
     if solo_mios or rol is Rol.ASESOR:

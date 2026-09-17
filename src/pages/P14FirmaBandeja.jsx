@@ -59,7 +59,7 @@ export default function P14FirmaBandeja() {
                     {c.tipo}
                   </span>
                   <span style={{ display: 'block', fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: '22px', color: 'var(--text-muted)', marginTop: 4 }}>
-                    {c.comunidad} · {c.lugar}
+                    {c.comunidad ?? 'Comunidad sin identificar en el registro'}
                   </span>
                 </div>
                 {c.estadoInterno === 'PENDIENTE_RADICACION' && (

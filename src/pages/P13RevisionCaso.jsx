@@ -22,7 +22,7 @@ const RIO_NAYA = {
 // plantilla del handoff hasta que exista ese endpoint.
 const proyeccion = (caso) =>
   `RESOLUCIÓN\n\n` +
-  `Por la cual se decide sobre la solicitud ${caso.numero} de ${(caso.tipo ?? '').toLowerCase()} del ${caso.comunidad}, ${caso.lugar}.\n\n` +
+  `Por la cual se decide sobre la solicitud ${caso.numero} de ${(caso.tipo ?? '').toLowerCase()} de ${caso.comunidad ?? '[VERIFICAR: comunidad]'}.\n\n` +
   `CONSIDERANDO: que la comunidad fue constituida mediante la Resolución 0512 del 4 de mayo de 2003.\n\n` +
   `CONSIDERANDO: que la comunidad radicó la solicitud junto con el acta de asamblea, el documento de identidad del nuevo representante y el listado de asistentes.\n\n` +
   `Sentido de la decisión: ${caso.sentido ?? 'pendiente de registro por el asesor'}.\n\n` +
@@ -88,7 +88,7 @@ export default function P13RevisionCaso() {
         Pantalla de revisión
       </h1>
       <p style={{ fontFamily: 'var(--font-body)', fontSize: 16, lineHeight: '24px', color: 'var(--text-body)', margin: '8px 0 24px', maxWidth: '70ch' }}>
-        {caso.numero} · {caso.tipo} · {caso.comunidad}
+        {[caso.numero, caso.tipo, caso.comunidad].filter(Boolean).join(' · ')}
       </p>
 
       {error && (

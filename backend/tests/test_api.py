@@ -387,3 +387,25 @@ def test_la_simulacion_no_promete_ahorro_del_100_por_ciento(cliente):
     # Y se dice que es estimación, no medición.
     assert tiempo["estimado"] is True
     assert "estimado" in tiempo["nota"]
+
+
+def test_una_bandeja_interna_no_se_le_abre_a_cualquiera(cliente):
+    """Sin esto, una cuenta de ciudadano leía las bandejas internas del Ministerio."""
+    ciudadana = token(cliente, "rosalba.mosquera@correo.com")
+    for rol in ("clasificador", "mesa", "revisor", "firmante"):
+        r = cliente.get(f"/api/bandejas/{rol}", headers=ciudadana)
+        assert r.status_code == 403, f"{rol} quedó expuesta: {r.status_code}"
+
+
+def test_cada_rol_ve_la_suya(cliente):
+    assert cliente.get(
+        "/api/bandejas/clasificador",
+        headers=token(cliente, "sandra.molano@mininterior.gov.co"),
+    ).status_code == 200
+
+
+def test_el_coordinador_supervisa_todas(cliente):
+    # Marta Rincón es mesa y coordinadora: la coordinación sí ve todas las etapas.
+    coord = token(cliente, "marta.rincon@mininterior.gov.co")
+    for rol in ("clasificador", "asesor", "revisor", "firmante"):
+        assert cliente.get(f"/api/bandejas/{rol}", headers=coord).status_code == 200

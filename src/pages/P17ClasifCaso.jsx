@@ -24,6 +24,14 @@ const CATEGORIAS = [
 
 const CAJA = { border: '1px solid var(--border-subtle)', borderRadius: 8, background: 'var(--surface-card)', padding: 16 }
 
+const fecha = (v) =>
+  v && !Number.isNaN(Date.parse(v))
+    ? new Date(v).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })
+    : v
+
+// Las claves de `datos` llegan en snake_case desde el backend; aquí se leen como texto.
+const etiqueta = (k) => k.replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase())
+
 export default function P17ClasifCaso() {
   const { radicado } = useParams()
   const navegar = useNavigate()
@@ -47,11 +55,10 @@ export default function P17ClasifCaso() {
   }
   if (!caso) return <Layout backoffice><Mudo>Cargando el caso…</Mudo></Layout>
 
-  const datosSolicitud = Object.entries(caso.datos ?? {}).map(([k, v]) => ({ k, v: String(v) }))
   const datos = [
-    { k: 'Comunidad', v: caso.comunidad },
-    { k: 'Fecha de radicación', v: caso.radicadoEl },
-    ...datosSolicitud,
+    { k: 'Comunidad', v: caso.comunidad ?? 'Sin comunidad asociada en el registro' },
+    { k: 'Fecha de radicación', v: fecha(caso.radicadoEl) ?? 'Sin registrar' },
+    ...Object.entries(caso.datos ?? {}).map(([k, v]) => ({ k: etiqueta(k), v: String(v) })),
   ]
 
   // Clasificar mueve el caso a la mesa de asignación (o lo traslada si no es competencia).
@@ -78,7 +85,7 @@ export default function P17ClasifCaso() {
         Pantalla de clasificación
       </h1>
       <Parrafo style={{ margin: '8px 0 24px', maxWidth: '70ch' }}>
-        {caso.numero} · {caso.comunidad} · {caso.lugar}
+        {[caso.numero, caso.comunidad].filter(Boolean).join(' · ')}
       </Parrafo>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>

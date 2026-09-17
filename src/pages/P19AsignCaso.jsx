@@ -68,7 +68,7 @@ export default function P19AsignCaso() {
         Pantalla de asignación
       </h1>
       <Parrafo style={{ margin: '8px 0 24px', maxWidth: '70ch' }}>
-        {caso.numero} · {caso.tipo} · {caso.comunidad}
+        {[caso.numero, caso.tipo, caso.comunidad].filter(Boolean).join(' · ')}
       </Parrafo>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.25fr .75fr', gap: 24, alignItems: 'start' }}>
