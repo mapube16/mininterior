@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from datetime import date
 
-from fastapi import Depends, FastAPI, HTTPException, Query, status
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import metricas, prerevision, reglas
+from . import metricas, ocr, prerevision, reglas
 from .db import crear_tablas, sesion
 from .enrutamiento import enrutar, proponer_asesor
 from .esquemas import (
@@ -213,6 +213,38 @@ def ver_comunidad(
 # --------------------------------------------------------------------------
 # Tipos de trámite
 # --------------------------------------------------------------------------
+
+@app.post("/api/documentos/leer", tags=["documentos"])
+async def leer_documento(
+    tipo_documento: str = Form(...),
+    archivo: UploadFile = File(...),
+    usuario: Usuario = Depends(exigir_rol(Rol.VENTANILLA, Rol.ASESOR, Rol.MESA, Rol.CIUDADANO)),
+) -> dict:
+    """Lee un documento y propone los campos que encontró.
+
+    Nunca falla el trámite: si no se puede leer, devuelve `legible: false` y el
+    funcionario transcribe a mano. Lo extraído llega SIN validar, para que una
+    persona lo revise antes de que entre al expediente (§4.3).
+    """
+    contenido = await archivo.read()
+    if len(contenido) > 10 * 1024 * 1024:
+        raise HTTPException(
+            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            "El archivo supera los 10 MB.",
+        )
+
+    lectura = ocr.leer(
+        contenido,
+        tipo_documento=tipo_documento,
+        mime=archivo.content_type or "application/pdf",
+    )
+    return {
+        **lectura.dict(),
+        "nombre_archivo": archivo.filename,
+        # Si no se pudo leer, el caso se marca prioritario en vez de bloquearse (§9).
+        "marcar_prioritario": not lectura.legible,
+    }
+
 
 @app.get("/api/tipos-tramite", tags=["tramites"])
 def tipos_tramite(db: Session = Depends(sesion)) -> list[dict]:

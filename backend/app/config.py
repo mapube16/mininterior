@@ -19,6 +19,16 @@ class Config(BaseSettings):
     # Los mocks de §11: se pueden forzar a fallar para demostrar la tolerancia.
     controldoc_falla: bool = False
 
+    # Gemini, para el OCR y el verificador de coherencia. Sin clave, esas piezas
+    # quedan desactivadas y el trámite sigue por vía manual: ningún componente de
+    # IA puede detener un caso.
+    gemini_api_key: str = ""
+    gemini_modelo: str = "gemini-3.6-flash"
+
+    @property
+    def hay_gemini(self) -> bool:
+        return bool(self.gemini_api_key)
+
     def url_sqlalchemy(self) -> str:
         # Railway entrega postgres://, que SQLAlchemy 2 ya no acepta.
         url = self.database_url
