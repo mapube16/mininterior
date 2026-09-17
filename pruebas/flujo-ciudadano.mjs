@@ -1,6 +1,6 @@
 import { chromium } from 'playwright-core'
-const B='http://localhost:4190'
-const nav = await chromium.launch({ executablePath:'C:/Program Files/Google/Chrome/Application/chrome.exe' })
+const B = process.env.BASE_URL ?? 'http://localhost:4173'
+const nav = await chromium.launch({ executablePath: process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe' })
 const p = await nav.newPage()
 const errs=[]; p.on('pageerror',e=>errs.push(e.message))
 
