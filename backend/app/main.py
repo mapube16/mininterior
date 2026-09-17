@@ -89,6 +89,14 @@ app.add_middleware(
 @app.on_event("startup")
 def preparar() -> None:
     crear_tablas()
+    # create_all no añade columnas a tablas que ya existen: sin esto, desplegar un
+    # modelo con un campo nuevo deja la base atrás y la API falla al escribir.
+    from .db import motor
+    from .migraciones import aplicar
+
+    aplicados = aplicar(motor)
+    if aplicados:
+        print(f"Esquema actualizado: {', '.join(aplicados)}")
 
 
 @app.exception_handler(TransicionInvalida)
